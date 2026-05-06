@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+<saveUnitProfiles>
+    <profiles>
+        <profile name="US">
+            <money>2</money>
+            <miles>true</miles>
+            <fahrenheit>true</fahrenheit>
+            <acre>true</acre>
+            <use24HourTime>false</use24HourTime>
+        </profile>
+        <profile name="UK">
+            <money>3</money>
+            <miles>true</miles>
+            <fahrenheit>false</fahrenheit>
+            <acre>true</acre>
+            <use24HourTime>true</use24HourTime>
+        </profile>
+        <profile name="EU">
+            <money>1</money>
+            <miles>false</miles>
+            <fahrenheit>false</fahrenheit>
+            <acre>false</acre>
+            <use24HourTime>true</use24HourTime>
+        </profile>
+    </profiles>
+    <savegames>
+        <!-- Edit these slot mappings after first run, or copy this file to modSettings/FS25_SaveUnitProfiles/saveUnitProfiles.xml. -->
+        <savegame slot="1" profile="UK" />
+        <savegame slot="9" profile="US" />
+        <savegame slot="12" profile="UK" />
+    </savegames>
+</saveUnitProfiles>
