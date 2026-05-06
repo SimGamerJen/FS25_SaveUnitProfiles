@@ -1,7 +1,7 @@
 --[[
     FS25_SaveUnitProfiles
-    ModVersion: 0.1.0.0
-    BuildTag: 20260506.1
+    ModVersion: 0.1.1.0
+    BuildTag: 20260506.2
 
     Purpose:
       Apply money/unit display preferences from a per-save XML profile.
@@ -14,8 +14,8 @@
 
 SaveUnitProfiles = {}
 SaveUnitProfiles.MOD_NAME = g_currentModName or "FS25_SaveUnitProfiles"
-SaveUnitProfiles.VERSION = "0.1.0.0"
-SaveUnitProfiles.BUILD_TAG = "20260506.1"
+SaveUnitProfiles.VERSION = "0.1.1.0"
+SaveUnitProfiles.BUILD_TAG = "20260506.2"
 SaveUnitProfiles.config = nil
 SaveUnitProfiles.activeSlot = nil
 SaveUnitProfiles.activeProfileName = nil
@@ -67,6 +67,27 @@ function SaveUnitProfiles:moneyName(value)
         return "Pounds"
     end
     return "Unknown"
+end
+
+function SaveUnitProfiles:showNotification(message, isWarning)
+    message = tostring(message or "")
+    if message == "" then
+        return
+    end
+
+    -- FS22/FS25 normally exposes addIngameNotification on the active mission.
+    -- Keep this defensive so the mod still works if the notification API is unavailable.
+    if g_currentMission ~= nil and g_currentMission.addIngameNotification ~= nil and FSBaseMission ~= nil then
+        local notificationType = FSBaseMission.INGAME_NOTIFICATION_INFO
+        if isWarning and FSBaseMission.INGAME_NOTIFICATION_CRITICAL ~= nil then
+            notificationType = FSBaseMission.INGAME_NOTIFICATION_CRITICAL
+        elseif isWarning and FSBaseMission.INGAME_NOTIFICATION_WARNING ~= nil then
+            notificationType = FSBaseMission.INGAME_NOTIFICATION_WARNING
+        end
+        g_currentMission:addIngameNotification(notificationType, message)
+    else
+        self:debugLog("Notification unavailable: " .. message)
+    end
 end
 
 function SaveUnitProfiles:ensureDefaultConfig()
@@ -272,8 +293,11 @@ function SaveUnitProfiles:applyProfile(profile, profileName, reason)
         table.concat(results, "; ")
     ))
 
-    if not allOk then
+    if allOk then
+        self:showNotification(string.format("Unit profile applied: %s", tostring(self.activeProfileName)), false)
+    else
         self:log("WARNING: One or more settings did not report success. Check whether FS25 recognises all setting names in this build.")
+        self:showNotification(string.format("Unit profile partly applied: %s", tostring(self.activeProfileName)), true)
     end
 
     return allOk

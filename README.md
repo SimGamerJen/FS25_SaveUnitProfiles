@@ -2,6 +2,8 @@
 
 First-pass Farming Simulator 25 script mod to apply currency and unit preferences per savegame slot.
 
+Version 0.1.1.0 adds a small in-game notification when a profile is applied.
+
 ## What it changes
 
 It uses `g_gameSettings:setValue(settingName, value, true)` for:
@@ -12,7 +14,7 @@ It uses `g_gameSettings:setValue(settingName, value, true)` for:
 - `useAcre`
 - `use24HourTime`
 
-The settings are global FS25 profile settings, so the mod applies the selected profile shortly after a save loads.
+The settings are global FS25 profile settings, so the mod applies the selected profile shortly after a save loads. When the apply succeeds, the game should show a small notification such as `Unit profile applied: UK`.
 
 ## Install
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no" ?>
-<modDesc descVersion="99">
+<modDesc descVersion="92">
     <author>SimGamerJen / ChatGPT</author>
-    <version>0.1.0.0</version>
+    <version>0.1.1.0</version>
     <title>
         <en>Save Unit Profiles</en>
     </title>
