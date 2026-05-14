@@ -1,63 +1,92 @@
 # FS25_SaveUnitProfiles
 
-First-pass Farming Simulator 25 script mod to apply currency and unit preferences per savegame slot.
+Save Unit Profiles is a Farming Simulator 25 utility script mod that applies currency and unit preferences automatically based on the loaded savegame slot.
 
-Version 0.1.1.0 adds a small in-game notification when a profile is applied.
+This is the `1.0.0.0` release candidate prepared for current FS25 builds using `modDesc descVersion="108"`.
 
-## What it changes
+## Features
 
-It uses `g_gameSettings:setValue(settingName, value, true)` for:
+- Applies unit/currency settings per savegame slot.
+- Supports configurable `US`, `UK`, and `EU` profiles by default.
+- Uses a per-user config file in `modSettings/FS25_SaveUnitProfiles/saveUnitProfiles.xml`.
+- Shows an in-game notification when a profile is applied.
+- Includes console commands for status, manual apply, reload, and debug logging.
 
-- `moneyUnit` — 1 Euro, 2 Dollar, 3 Pounds
+## Settings applied
+
+The mod applies the following FS25 game settings at runtime:
+
+- `moneyUnit` — `1 = Euro`, `2 = Dollar`, `3 = Pounds`
 - `useMiles`
 - `useFahrenheit`
 - `useAcre`
 - `use24HourTime`
 
-The settings are global FS25 profile settings, so the mod applies the selected profile shortly after a save loads. When the apply succeeds, the game should show a small notification such as `Unit profile applied: UK`.
-
 ## Install
 
-1. Put `FS25_SaveUnitProfiles.zip` in your FS25 mods folder.
-2. Enable it for the relevant save.
+1. Place `FS25_SaveUnitProfiles.zip` in your Farming Simulator 25 mods folder.
+2. Enable the mod for the relevant savegame.
 3. Load the save once.
-4. The mod will create:
+4. The mod will create this config file if it does not already exist:
 
 ```text
 Documents/My Games/FarmingSimulator2025/modSettings/FS25_SaveUnitProfiles/saveUnitProfiles.xml
 ```
 
-5. Edit the `<savegames>` mappings to match your save slots.
+5. Edit the savegame slot mappings in that file.
 
 ## Example config
 
 ```xml
-<savegame slot="9" profile="US" />
-<savegame slot="12" profile="UK" />
+<saveUnitProfiles>
+    <profiles>
+        <profile name="US">
+            <money>2</money>
+            <miles>true</miles>
+            <fahrenheit>true</fahrenheit>
+            <acre>true</acre>
+            <use24HourTime>false</use24HourTime>
+        </profile>
+        <profile name="UK">
+            <money>3</money>
+            <miles>true</miles>
+            <fahrenheit>false</fahrenheit>
+            <acre>true</acre>
+            <use24HourTime>true</use24HourTime>
+        </profile>
+        <profile name="EU">
+            <money>1</money>
+            <miles>false</miles>
+            <fahrenheit>false</fahrenheit>
+            <acre>false</acre>
+            <use24HourTime>true</use24HourTime>
+        </profile>
+    </profiles>
+    <savegames>
+        <savegame slot="1" profile="UK" />
+        <savegame slot="9" profile="US" />
+        <savegame slot="12" profile="UK" />
+    </savegames>
+</saveUnitProfiles>
 ```
 
 ## Console commands
 
-Open the developer console and use:
+- `suStatus` — shows current slot, profile, and active game settings.
+- `suReload` — reloads the XML config.
+- `suApply` — applies the mapped profile for the current save.
+- `suApply UK` — manually applies a named profile.
+- `suApply US` — manually applies a named profile.
+- `suDebug on` — enables extra logging.
+- `suDebug off` — disables extra logging.
 
-```text
-suStatus
-suReload
-suApply
-suApply UK
-suApply US
-suDebug on
-suDebug off
-```
+## Notes
 
-## Test plan
+- Savegame-to-profile mappings are intentionally edited in XML for this release.
+- This mod changes display/unit preferences only. It does not convert money values or alter savegame economy values.
+- Because this is a Lua script mod, it is intended for PC/Mac use.
 
-1. Load a US save mapped to `US`.
-2. Run `suStatus`.
-3. Confirm `moneyUnit` is 2 and Fahrenheit is true.
-4. Save and quit.
-5. Load a UK save mapped to `UK`.
-6. Run `suStatus`.
-7. Confirm `moneyUnit` is 3 and Fahrenheit is false.
+## Version
 
-If the values change in `suStatus` but parts of the UI do not refresh immediately, close and reopen the affected menu screen. If FS25 caches a setting until game restart, this mod proves the mapping but an external launcher would be needed for that setting.
+- Mod version: `1.0.0.0`
+- Build tag: `20260514.1`

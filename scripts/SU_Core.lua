@@ -1,7 +1,7 @@
 --[[
     FS25_SaveUnitProfiles
-    ModVersion: 0.1.1.0
-    BuildTag: 20260506.2
+    ModVersion: 1.0.0.0
+    BuildTag: 20260514.1
 
     Purpose:
       Apply money/unit display preferences from a per-save XML profile.
@@ -14,8 +14,8 @@
 
 SaveUnitProfiles = {}
 SaveUnitProfiles.MOD_NAME = g_currentModName or "FS25_SaveUnitProfiles"
-SaveUnitProfiles.VERSION = "0.1.1.0"
-SaveUnitProfiles.BUILD_TAG = "20260506.2"
+SaveUnitProfiles.VERSION = "1.0.0.0"
+SaveUnitProfiles.BUILD_TAG = "20260514.1"
 SaveUnitProfiles.config = nil
 SaveUnitProfiles.activeSlot = nil
 SaveUnitProfiles.activeProfileName = nil
@@ -23,7 +23,7 @@ SaveUnitProfiles.lastApplyOk = false
 SaveUnitProfiles.hasApplied = false
 SaveUnitProfiles.applyDelayMs = 1500
 SaveUnitProfiles.elapsedMs = 0
-SaveUnitProfiles.debug = true
+SaveUnitProfiles.debug = false
 
 local function suBoolToString(value)
     if value == nil then

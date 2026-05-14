@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8" standalone="no" ?>
-<modDesc descVersion="92">
+<modDesc descVersion="108">
     <author>SimGamerJen</author>
-    <version>0.1.1.0</version>
+    <version>1.0.0.0</version>
     <title>
         <en>Save Unit Profiles</en>
     </title>
     <description>
-        <en>Applies currency and measurement unit preferences automatically per savegame slot.</en>
+        <en>Automatically applies currency and measurement unit preferences based on the loaded savegame slot.</en>
     </description>
     <iconFilename>icon.dds</iconFilename>
     <multiplayer supported="false" />
