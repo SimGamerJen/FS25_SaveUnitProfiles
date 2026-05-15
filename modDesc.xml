@@ -12,80 +12,109 @@
         <pl>Profile jednostek zapisu</pl>
         <cs>Profily jednotek ukládání</cs>
     </title>
-    <description>
-        <en><![CDATA[
-Description: Save Unit Profiles automatically applies currency and measurement unit settings based on the loaded savegame slot. This is useful when switching between maps from different regions, such as US, UK and European maps. Each configured savegame can use its own currency, speed, temperature, area and time format settings.
+	<description>
+		<en><![CDATA[
+	Description:
+	Save Unit Profiles automatically applies currency and measurement unit preferences based on the loaded savegame slot.
 
-Configuration: Savegame mappings and regional profiles are configured in modSettings/FS25_SaveUnitProfiles/saveUnitProfiles.xml. Default profiles are included for US, UK and EU style settings.
+	This is useful when playing maps from different regions. For example, an American savegame can use dollars, miles, Fahrenheit and acres, while a UK savegame can use pounds, miles, Celsius and acres, and a European savegame can use euros, kilometres, Celsius and hectares.
 
-Hotkeys: None. The mod runs automatically when a configured savegame is loaded. Optional developer console commands are available for testing and troubleshooting: suStatus, suReload, suApply, suApply US, suApply UK, suApply EU, suDebug on and suDebug off.
+	Configuration:
+	After the mod has been loaded once, edit the configuration file:
 
-GitHub link: https://github.com/SimGamerJen/FS25_SaveUnitProfiles
-]]></en>
-        <de><![CDATA[
-Beschreibung: Speichereinheiten-Profile wendet automatisch Währungs- und Maßeinheiteneinstellungen anhand des geladenen Spielstands an. Dies ist nützlich, wenn zwischen Karten aus verschiedenen Regionen gewechselt wird, zum Beispiel US-, UK- und europäischen Karten. Jeder konfigurierte Spielstand kann eigene Einstellungen für Währung, Geschwindigkeit, Temperatur, Fläche und Zeitformat verwenden.
+	modSettings/FS25_SaveUnitProfiles/saveUnitProfiles.xml
 
-Konfiguration: Spielstand-Zuordnungen und regionale Profile werden in modSettings/FS25_SaveUnitProfiles/saveUnitProfiles.xml konfiguriert. Standardprofile für US-, UK- und EU-Einstellungen sind enthalten.
+	In this file, assign each savegame slot to a unit profile.
 
-Tastenkombinationen: Keine. Der Mod wird automatisch ausgeführt, wenn ein konfigurierter Spielstand geladen wird. Optionale Entwicklerkonsolenbefehle stehen zum Testen und zur Fehlerbehebung zur Verfügung: suStatus, suReload, suApply, suApply US, suApply UK, suApply EU, suDebug on und suDebug off.
+	Example mappings:
+	savegame slot 1 = UK
+	savegame slot 9 = US
+	savegame slot 12 = EU
 
-GitHub-Link: https://github.com/SimGamerJen/FS25_SaveUnitProfiles
-]]></de>
-        <fr><![CDATA[
-Description : Save Unit Profiles applique automatiquement les paramètres de devise et d'unités de mesure selon l'emplacement de sauvegarde chargé. Le mod est utile pour passer d'une carte régionale à une autre, par exemple entre des cartes américaines, britanniques et européennes. Chaque sauvegarde configurée peut utiliser ses propres paramètres de devise, vitesse, température, surface et format horaire.
+	The included default profiles are US, UK and EU. Custom profiles can also be created in the same XML file.
 
-Configuration : Les associations de sauvegardes et les profils régionaux sont configurés dans modSettings/FS25_SaveUnitProfiles/saveUnitProfiles.xml. Des profils par défaut sont inclus pour les réglages US, UK et EU.
+	Hotkeys:
+	No hotkeys are required.
 
-Raccourcis : Aucun. Le mod fonctionne automatiquement lorsqu'une sauvegarde configurée est chargée. Des commandes facultatives de console développeur sont disponibles pour les tests et le dépannage : suStatus, suReload, suApply, suApply US, suApply UK, suApply EU, suDebug on et suDebug off.
+	Console commands:
+	suStatus - Show current status and loaded settings.
+	suReload - Reload the XML configuration file.
+	suApply - Apply the configured profile for the current savegame.
+	suApply UK / suApply US / suApply EU - Manually apply a specific profile.
+	suDebug on / suDebug off - Enable or disable debug logging.
 
-Lien GitHub : https://github.com/SimGamerJen/FS25_SaveUnitProfiles
-]]></fr>
-        <es><![CDATA[
-Descripción: Save Unit Profiles aplica automáticamente los ajustes de moneda y unidades de medida según la ranura de la partida guardada cargada. Es útil al cambiar entre mapas de distintas regiones, como mapas de Estados Unidos, Reino Unido y Europa. Cada partida configurada puede usar sus propios ajustes de moneda, velocidad, temperatura, superficie y formato horario.
+	GitHub link:
+	https://github.com/SimGamerJen/FS25_SaveUnitProfiles
+	]]></en>
 
-Configuración: Las asignaciones de partidas guardadas y los perfiles regionales se configuran en modSettings/FS25_SaveUnitProfiles/saveUnitProfiles.xml. Se incluyen perfiles predeterminados para ajustes de tipo US, UK y EU.
+		<de><![CDATA[
+	Beschreibung:
+	Save Unit Profiles wendet automatisch Währungs- und Maßeinheiteneinstellungen basierend auf dem geladenen Spielstand-Slot an.
 
-Teclas de acceso rápido: Ninguna. El mod se ejecuta automáticamente al cargar una partida configurada. Hay comandos opcionales de la consola de desarrollador para pruebas y solución de problemas: suStatus, suReload, suApply, suApply US, suApply UK, suApply EU, suDebug on y suDebug off.
+	Dies ist nützlich, wenn Karten aus verschiedenen Regionen gespielt werden. Zum Beispiel kann ein amerikanischer Spielstand Dollar, Meilen, Fahrenheit und Acres verwenden, während ein britischer Spielstand Pfund, Meilen, Celsius und Acres verwendet und ein europäischer Spielstand Euro, Kilometer, Celsius und Hektar verwendet.
 
-Enlace de GitHub: https://github.com/SimGamerJen/FS25_SaveUnitProfiles
-]]></es>
-        <it><![CDATA[
-Descrizione: Save Unit Profiles applica automaticamente le impostazioni di valuta e unità di misura in base allo slot del salvataggio caricato. È utile quando si passa tra mappe di regioni diverse, come mappe statunitensi, britanniche ed europee. Ogni salvataggio configurato può usare le proprie impostazioni di valuta, velocità, temperatura, superficie e formato orario.
+	Konfiguration:
+	Nachdem der Mod einmal geladen wurde, bearbeiten Sie die Konfigurationsdatei:
 
-Configurazione: Le associazioni dei salvataggi e i profili regionali sono configurati in modSettings/FS25_SaveUnitProfiles/saveUnitProfiles.xml. Sono inclusi profili predefiniti per impostazioni US, UK ed EU.
+	modSettings/FS25_SaveUnitProfiles/saveUnitProfiles.xml
 
-Tasti di scelta rapida: Nessuno. Il mod funziona automaticamente quando viene caricato un salvataggio configurato. Sono disponibili comandi opzionali della console sviluppatore per test e risoluzione dei problemi: suStatus, suReload, suApply, suApply US, suApply UK, suApply EU, suDebug on e suDebug off.
+	Weisen Sie in dieser Datei jedem Spielstand-Slot ein Einheitenprofil zu.
 
-Link GitHub: https://github.com/SimGamerJen/FS25_SaveUnitProfiles
-]]></it>
-        <nl><![CDATA[
-Beschrijving: Save Unit Profiles past automatisch valuta- en meeteenheidinstellingen toe op basis van het geladen savegame-slot. Dit is handig wanneer je wisselt tussen kaarten uit verschillende regio's, zoals Amerikaanse, Britse en Europese kaarten. Elke geconfigureerde savegame kan eigen instellingen gebruiken voor valuta, snelheid, temperatuur, oppervlakte en tijdnotatie.
+	Beispiel-Zuordnungen:
+	Spielstand-Slot 1 = UK
+	Spielstand-Slot 9 = US
+	Spielstand-Slot 12 = EU
 
-Configuratie: Savegame-koppelingen en regionale profielen worden ingesteld in modSettings/FS25_SaveUnitProfiles/saveUnitProfiles.xml. Standaardprofielen voor US-, UK- en EU-instellingen zijn inbegrepen.
+	Die enthaltenen Standardprofile sind US, UK und EU. Eigene Profile können ebenfalls in derselben XML-Datei erstellt werden.
 
-Sneltoetsen: Geen. De mod draait automatisch wanneer een geconfigureerde savegame wordt geladen. Optionele ontwikkelaarsconsole-opdrachten zijn beschikbaar voor testen en probleemoplossing: suStatus, suReload, suApply, suApply US, suApply UK, suApply EU, suDebug on en suDebug off.
+	Tastenkombinationen:
+	Es sind keine Tastenkombinationen erforderlich.
 
-GitHub-link: https://github.com/SimGamerJen/FS25_SaveUnitProfiles
-]]></nl>
-        <pl><![CDATA[
-Opis: Save Unit Profiles automatycznie stosuje ustawienia waluty i jednostek miary na podstawie wczytanego slotu zapisu gry. Jest to przydatne przy przełączaniu się między mapami z różnych regionów, na przykład mapami amerykańskimi, brytyjskimi i europejskimi. Każdy skonfigurowany zapis może używać własnych ustawień waluty, prędkości, temperatury, powierzchni i formatu czasu.
+	Konsolenbefehle:
+	suStatus - Zeigt den aktuellen Status und die geladenen Einstellungen an.
+	suReload - Lädt die XML-Konfigurationsdatei neu.
+	suApply - Wendet das konfigurierte Profil für den aktuellen Spielstand an.
+	suApply UK / suApply US / suApply EU - Wendet manuell ein bestimmtes Profil an.
+	suDebug on / suDebug off - Aktiviert oder deaktiviert die Debug-Protokollierung.
 
-Konfiguracja: Przypisania zapisów gry i profile regionalne są konfigurowane w modSettings/FS25_SaveUnitProfiles/saveUnitProfiles.xml. Dołączono domyślne profile dla ustawień US, UK i EU.
+	GitHub-Link:
+	https://github.com/SimGamerJen/FS25_SaveUnitProfiles
+	]]></de>
 
-Skróty klawiszowe: Brak. Mod działa automatycznie po wczytaniu skonfigurowanego zapisu gry. Opcjonalne polecenia konsoli deweloperskiej są dostępne do testowania i rozwiązywania problemów: suStatus, suReload, suApply, suApply US, suApply UK, suApply EU, suDebug on i suDebug off.
+		<fr><![CDATA[
+	Description :
+	Save Unit Profiles applique automatiquement les préférences de devise et d'unités de mesure en fonction de l'emplacement de sauvegarde chargé.
 
-Link GitHub: https://github.com/SimGamerJen/FS25_SaveUnitProfiles
-]]></pl>
-        <cs><![CDATA[
-Popis: Save Unit Profiles automaticky použije nastavení měny a měrných jednotek podle načteného slotu uložené hry. Hodí se při přepínání mezi mapami z různých regionů, například americkými, britskými a evropskými mapami. Každá nakonfigurovaná uložená hra může používat vlastní nastavení měny, rychlosti, teploty, plochy a formátu času.
+	C'est utile lorsque vous jouez sur des cartes de différentes régions. Par exemple, une sauvegarde américaine peut utiliser les dollars, les miles, les degrés Fahrenheit et les acres, tandis qu'une sauvegarde britannique peut utiliser les livres sterling, les miles, les degrés Celsius et les acres, et une sauvegarde européenne peut utiliser les euros, les kilomètres, les degrés Celsius et les hectares.
 
-Konfigurace: Přiřazení uložených her a regionální profily se nastavují v modSettings/FS25_SaveUnitProfiles/saveUnitProfiles.xml. Součástí jsou výchozí profily pro nastavení US, UK a EU.
+	Configuration :
+	Après avoir chargé le mod une première fois, modifiez le fichier de configuration :
 
-Klávesové zkratky: Žádné. Mod se spustí automaticky při načtení nakonfigurované uložené hry. Pro testování a řešení problémů jsou k dispozici volitelné příkazy vývojářské konzole: suStatus, suReload, suApply, suApply US, suApply UK, suApply EU, suDebug on a suDebug off.
+	modSettings/FS25_SaveUnitProfiles/saveUnitProfiles.xml
 
-Odkaz GitHub: https://github.com/SimGamerJen/FS25_SaveUnitProfiles
-]]></cs>
-    </description>
+	Dans ce fichier, attribuez chaque emplacement de sauvegarde à un profil d'unités.
+
+	Exemples d'attribution :
+	emplacement de sauvegarde 1 = UK
+	emplacement de sauvegarde 9 = US
+	emplacement de sauvegarde 12 = EU
+
+	Les profils par défaut inclus sont US, UK et EU. Des profils personnalisés peuvent également être créés dans le même fichier XML.
+
+	Raccourcis :
+	Aucun raccourci n'est requis.
+
+	Commandes de console :
+	suStatus - Affiche l'état actuel et les paramètres chargés.
+	suReload - Recharge le fichier de configuration XML.
+	suApply - Applique le profil configuré pour la sauvegarde actuelle.
+	suApply UK / suApply US / suApply EU - Applique manuellement un profil spécifique.
+	suDebug on / suDebug off - Active ou désactive la journalisation de débogage.
+
+	Lien GitHub :
+	https://github.com/SimGamerJen/FS25_SaveUnitProfiles
+	]]></fr>
+	</description>
     <iconFilename>icon.dds</iconFilename>
     <multiplayer supported="false" />
 
