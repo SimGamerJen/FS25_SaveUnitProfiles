@@ -2,7 +2,7 @@
 
 Save Unit Profiles is a Farming Simulator 25 utility script mod that applies currency and unit preferences automatically based on the loaded savegame slot.
 
-This is the `1.0.0.0` release candidate prepared for current FS25 builds using `modDesc descVersion="108"`.
+This is the `1.1.0.0` experimental usability build prepared for current FS25 builds using `modDesc descVersion="108"`.
 
 ## Features
 
@@ -10,7 +10,8 @@ This is the `1.0.0.0` release candidate prepared for current FS25 builds using `
 - Supports configurable `US`, `UK`, and `EU` profiles by default.
 - Uses a per-user config file in `modSettings/FS25_SaveUnitProfiles/saveUnitProfiles.xml`.
 - Shows an in-game notification when a profile is applied.
-- Includes console commands for status, manual apply, reload, and debug logging.
+- Can save the current game unit settings for the loaded savegame with `suSaveCurrent`.
+- Includes console commands for status, manual apply, reload, UI probing, and debug logging.
 
 ## Settings applied
 
@@ -77,6 +78,9 @@ Documents/My Games/FarmingSimulator2025/modSettings/FS25_SaveUnitProfiles/saveUn
 - `suApply` — applies the mapped profile for the current save.
 - `suApply UK` — manually applies a named profile.
 - `suApply US` — manually applies a named profile.
+- `suSaveCurrent` — saves the current game unit settings as a save-specific profile for the loaded savegame.
+- `suUiProbe` — logs UI/buttonbar diagnostic information while testing the General Settings button hook.
+- `suUiProbe inject` — attempts live button injection into detected buttonbar candidates for diagnostic testing.
 - `suDebug on` — enables extra logging.
 - `suDebug off` — disables extra logging.
 
@@ -90,3 +94,23 @@ Documents/My Games/FarmingSimulator2025/modSettings/FS25_SaveUnitProfiles/saveUn
 
 - Mod version: `1.0.0.0`
 - Build tag: `20260514.1`
+
+
+## Saving the Current Savegame Units
+
+From version 1.1.0.0, the mod can save the currently selected unit settings for the loaded savegame.
+
+Open the in-game General Settings screen, set the unit options as required, then use the **SAVE UNITS** button where available. The mod will create or update a save-specific profile such as `SAVEGAME_12` and map the current save slot to that profile.
+
+If the UI button is not available due to a game update or another UI mod, use the console command:
+
+```text
+suSaveCurrent
+```
+
+This performs the same save-specific profile update.
+
+
+## 1.1.0.0 UI Save Units Build
+
+Adds a SAVE UNITS button to the in-game Settings button bar. The button saves the currently selected global unit/currency settings as a save-specific profile for the active savegame. The console fallback command is `suSaveCurrent`.

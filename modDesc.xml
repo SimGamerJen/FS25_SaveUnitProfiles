@@ -1,120 +1,107 @@
 <?xml version="1.0" encoding="utf-8" standalone="no" ?>
 <modDesc descVersion="108">
     <author>SimGamerJen</author>
-    <version>1.0.0.0</version>
+    <version>1.1.0.0</version>
     <title>
         <en>Save Unit Profiles</en>
         <de>Speichereinheiten-Profile</de>
-        <fr>Profils d'unités par sauvegarde</fr>
-        <es>Perfiles de unidades por partida</es>
-        <it>Profili unità di salvataggio</it>
-        <nl>Opslagspel eenheidsprofielen</nl>
-        <pl>Profile jednostek zapisu</pl>
-        <cs>Profily jednotek ukládání</cs>
+        <fr>Profils d'unités de sauvegarde</fr>
     </title>
-	<description>
-		<en><![CDATA[
-	Description:
-	Save Unit Profiles automatically applies currency and measurement unit preferences based on the loaded savegame slot.
+    <description>
+        <en><![CDATA[
+Description:
+Save Unit Profiles automatically applies currency and measurement unit preferences based on the loaded savegame slot.
 
-	This is useful when playing maps from different regions. For example, an American savegame can use dollars, miles, Fahrenheit and acres, while a UK savegame can use pounds, miles, Celsius and acres, and a European savegame can use euros, kilometres, Celsius and hectares.
+This is useful when playing maps from different regions. For example, an American savegame can use dollars, miles, Fahrenheit and acres, while a UK savegame can use pounds, miles, Celsius and acres, and a European savegame can use euros, kilometres, Celsius and hectares.
 
-	Configuration:
-	After the mod has been loaded once, edit the configuration file:
+Configuration:
+After the mod has been loaded once, edit the configuration file:
 
-	modSettings/FS25_SaveUnitProfiles/saveUnitProfiles.xml
+modSettings/FS25_SaveUnitProfiles/saveUnitProfiles.xml
 
-	In this file, assign each savegame slot to a unit profile.
+Savegame mappings can be edited manually, or the current unit settings can be saved for the loaded savegame from the General Settings screen using the SAVE UNITS button where available.
 
-	Example mappings:
-	savegame slot 1 = UK
-	savegame slot 9 = US
-	savegame slot 12 = EU
+The included default profiles are US, UK and EU. Custom profiles can also be created in the same XML file.
 
-	The included default profiles are US, UK and EU. Custom profiles can also be created in the same XML file.
+Hotkeys:
+No hotkeys are required.
 
-	Hotkeys:
-	No hotkeys are required.
+Console commands:
+suStatus - Show current status and loaded settings.
+suReload - Reload the XML configuration file.
+suApply - Apply the configured profile for the current savegame.
+suApply UK / suApply US / suApply EU - Manually apply a specific profile.
+suSaveCurrent - Save the current unit settings for the loaded savegame.
+suUiProbe - Log UI/buttonbar diagnostic information for the General Settings screen.
+suUiProbe inject - Try live diagnostic button injection while the General Settings screen is open.
+suDebug on / suDebug off - Enable or disable debug logging.
 
-	Console commands:
-	suStatus - Show current status and loaded settings.
-	suReload - Reload the XML configuration file.
-	suApply - Apply the configured profile for the current savegame.
-	suApply UK / suApply US / suApply EU - Manually apply a specific profile.
-	suDebug on / suDebug off - Enable or disable debug logging.
+GitHub link:
+https://github.com/SimGamerJen/FS25_SaveUnitProfiles
+]]></en>
+        <de><![CDATA[
+Beschreibung:
+Save Unit Profiles wendet automatisch Währungs- und Maßeinheiteneinstellungen basierend auf dem geladenen Spielstand-Slot an.
 
-	GitHub link:
-	https://github.com/SimGamerJen/FS25_SaveUnitProfiles
-	]]></en>
+Dies ist nützlich, wenn Karten aus verschiedenen Regionen gespielt werden. Zum Beispiel kann ein amerikanischer Spielstand Dollar, Meilen, Fahrenheit und Acres verwenden, während ein britischer Spielstand Pfund, Meilen, Celsius und Acres verwendet und ein europäischer Spielstand Euro, Kilometer, Celsius und Hektar verwendet.
 
-		<de><![CDATA[
-	Beschreibung:
-	Save Unit Profiles wendet automatisch Währungs- und Maßeinheiteneinstellungen basierend auf dem geladenen Spielstand-Slot an.
+Konfiguration:
+Nachdem der Mod einmal geladen wurde, bearbeiten Sie die Konfigurationsdatei:
 
-	Dies ist nützlich, wenn Karten aus verschiedenen Regionen gespielt werden. Zum Beispiel kann ein amerikanischer Spielstand Dollar, Meilen, Fahrenheit und Acres verwenden, während ein britischer Spielstand Pfund, Meilen, Celsius und Acres verwendet und ein europäischer Spielstand Euro, Kilometer, Celsius und Hektar verwendet.
+modSettings/FS25_SaveUnitProfiles/saveUnitProfiles.xml
 
-	Konfiguration:
-	Nachdem der Mod einmal geladen wurde, bearbeiten Sie die Konfigurationsdatei:
+Spielstand-Zuordnungen können manuell bearbeitet werden. Wo verfügbar, können die aktuellen Einheiteneinstellungen auch über die Schaltfläche SAVE UNITS im Bildschirm Allgemeine Einstellungen für den geladenen Spielstand gespeichert werden.
 
-	modSettings/FS25_SaveUnitProfiles/saveUnitProfiles.xml
+Die enthaltenen Standardprofile sind US, UK und EU. Eigene Profile können ebenfalls in derselben XML-Datei erstellt werden.
 
-	Weisen Sie in dieser Datei jedem Spielstand-Slot ein Einheitenprofil zu.
+Tastenkombinationen:
+Es sind keine Tastenkombinationen erforderlich.
 
-	Beispiel-Zuordnungen:
-	Spielstand-Slot 1 = UK
-	Spielstand-Slot 9 = US
-	Spielstand-Slot 12 = EU
+Konsolenbefehle:
+suStatus - Zeigt den aktuellen Status und die geladenen Einstellungen an.
+suReload - Lädt die XML-Konfigurationsdatei neu.
+suApply - Wendet das konfigurierte Profil für den aktuellen Spielstand an.
+suApply UK / suApply US / suApply EU - Wendet manuell ein bestimmtes Profil an.
+suSaveCurrent - Speichert die aktuellen Einheiteneinstellungen für den geladenen Spielstand.
+suUiProbe - Protokolliert UI-/Schaltflächenleisten-Diagnoseinformationen für den Bildschirm Allgemeine Einstellungen.
+suUiProbe inject - Versucht eine direkte diagnostische Schaltflächen-Injektion, während der Bildschirm Allgemeine Einstellungen geöffnet ist.
+suDebug on / suDebug off - Aktiviert oder deaktiviert die Debug-Protokollierung.
 
-	Die enthaltenen Standardprofile sind US, UK und EU. Eigene Profile können ebenfalls in derselben XML-Datei erstellt werden.
+GitHub-Link:
+https://github.com/SimGamerJen/FS25_SaveUnitProfiles
+]]></de>
+        <fr><![CDATA[
+Description :
+Save Unit Profiles applique automatiquement les préférences de devise et d'unités de mesure en fonction de l'emplacement de sauvegarde chargé.
 
-	Tastenkombinationen:
-	Es sind keine Tastenkombinationen erforderlich.
+C'est utile lorsque vous jouez sur des cartes de différentes régions. Par exemple, une sauvegarde américaine peut utiliser les dollars, les miles, les degrés Fahrenheit et les acres, tandis qu'une sauvegarde britannique peut utiliser les livres sterling, les miles, les degrés Celsius et les acres, et une sauvegarde européenne peut utiliser les euros, les kilomètres, les degrés Celsius et les hectares.
 
-	Konsolenbefehle:
-	suStatus - Zeigt den aktuellen Status und die geladenen Einstellungen an.
-	suReload - Lädt die XML-Konfigurationsdatei neu.
-	suApply - Wendet das konfigurierte Profil für den aktuellen Spielstand an.
-	suApply UK / suApply US / suApply EU - Wendet manuell ein bestimmtes Profil an.
-	suDebug on / suDebug off - Aktiviert oder deaktiviert die Debug-Protokollierung.
+Configuration :
+Après avoir chargé le mod une première fois, modifiez le fichier de configuration :
 
-	GitHub-Link:
-	https://github.com/SimGamerJen/FS25_SaveUnitProfiles
-	]]></de>
+modSettings/FS25_SaveUnitProfiles/saveUnitProfiles.xml
 
-		<fr><![CDATA[
-	Description :
-	Save Unit Profiles applique automatiquement les préférences de devise et d'unités de mesure en fonction de l'emplacement de sauvegarde chargé.
+Les attributions de sauvegarde peuvent être modifiées manuellement. Lorsque disponible, les paramètres d'unités actuels peuvent aussi être enregistrés pour la sauvegarde chargée depuis l'écran Paramètres généraux avec le bouton SAVE UNITS.
 
-	C'est utile lorsque vous jouez sur des cartes de différentes régions. Par exemple, une sauvegarde américaine peut utiliser les dollars, les miles, les degrés Fahrenheit et les acres, tandis qu'une sauvegarde britannique peut utiliser les livres sterling, les miles, les degrés Celsius et les acres, et une sauvegarde européenne peut utiliser les euros, les kilomètres, les degrés Celsius et les hectares.
+Les profils par défaut inclus sont US, UK et EU. Des profils personnalisés peuvent également être créés dans le même fichier XML.
 
-	Configuration :
-	Après avoir chargé le mod une première fois, modifiez le fichier de configuration :
+Raccourcis :
+Aucun raccourci n'est requis.
 
-	modSettings/FS25_SaveUnitProfiles/saveUnitProfiles.xml
+Commandes de console :
+suStatus - Affiche l'état actuel et les paramètres chargés.
+suReload - Recharge le fichier de configuration XML.
+suApply - Applique le profil configuré pour la sauvegarde actuelle.
+suApply UK / suApply US / suApply EU - Applique manuellement un profil spécifique.
+suSaveCurrent - Enregistre les paramètres d'unités actuels pour la sauvegarde chargée.
+suUiProbe - Journalise les informations de diagnostic de l'interface et de la barre de boutons pour l'écran Paramètres généraux.
+suUiProbe inject - Tente une injection de bouton de diagnostic en direct lorsque l'écran Paramètres généraux est ouvert.
+suDebug on / suDebug off - Active ou désactive la journalisation de débogage.
 
-	Dans ce fichier, attribuez chaque emplacement de sauvegarde à un profil d'unités.
-
-	Exemples d'attribution :
-	emplacement de sauvegarde 1 = UK
-	emplacement de sauvegarde 9 = US
-	emplacement de sauvegarde 12 = EU
-
-	Les profils par défaut inclus sont US, UK et EU. Des profils personnalisés peuvent également être créés dans le même fichier XML.
-
-	Raccourcis :
-	Aucun raccourci n'est requis.
-
-	Commandes de console :
-	suStatus - Affiche l'état actuel et les paramètres chargés.
-	suReload - Recharge le fichier de configuration XML.
-	suApply - Applique le profil configuré pour la sauvegarde actuelle.
-	suApply UK / suApply US / suApply EU - Applique manuellement un profil spécifique.
-	suDebug on / suDebug off - Active ou désactive la journalisation de débogage.
-
-	Lien GitHub :
-	https://github.com/SimGamerJen/FS25_SaveUnitProfiles
-	]]></fr>
-	</description>
+Lien GitHub :
+https://github.com/SimGamerJen/FS25_SaveUnitProfiles
+]]></fr>
+    </description>
     <iconFilename>icon.dds</iconFilename>
     <multiplayer supported="false" />
 
