@@ -5,7 +5,7 @@
     <title>
         <en>Save Unit Profiles</en>
         <de>Speichereinheiten-Profile</de>
-        <fr>Profils d'unités de sauvegarde</fr>
+        <fr>Profils D'unités De Sauvegarde</fr>
     </title>
     <description>
         <en><![CDATA[
@@ -32,9 +32,20 @@ suReload - Reload the XML configuration file.
 suApply - Apply the configured profile for the current savegame.
 suApply UK / suApply US / suApply EU - Manually apply a specific profile.
 suSaveCurrent - Save the current unit settings for the loaded savegame.
-suUiProbe - Log UI/buttonbar diagnostic information for the General Settings screen.
-suUiProbe inject - Try live diagnostic button injection while the General Settings screen is open.
 suDebug on / suDebug off - Enable or disable debug logging.
+
+Changelog:
+Version 1.1.0.0
+- Added SAVE UNITS button to the in-game Settings interface.
+- Added support for saving the current unit settings directly to the loaded savegame profile.
+- Added suSaveCurrent console command as a manual fallback.
+- Existing manual XML mappings and custom profiles remain supported.
+
+Version 1.0.0.0
+- Initial release.
+- Added per-savegame unit and currency profiles.
+- Added default US, UK and EU profiles.
+- Added console commands for status, reload, manual apply and debug logging.
 
 GitHub link:
 https://github.com/SimGamerJen/FS25_SaveUnitProfiles
@@ -63,9 +74,20 @@ suReload - Lädt die XML-Konfigurationsdatei neu.
 suApply - Wendet das konfigurierte Profil für den aktuellen Spielstand an.
 suApply UK / suApply US / suApply EU - Wendet manuell ein bestimmtes Profil an.
 suSaveCurrent - Speichert die aktuellen Einheiteneinstellungen für den geladenen Spielstand.
-suUiProbe - Protokolliert UI-/Schaltflächenleisten-Diagnoseinformationen für den Bildschirm Allgemeine Einstellungen.
-suUiProbe inject - Versucht eine direkte diagnostische Schaltflächen-Injektion, während der Bildschirm Allgemeine Einstellungen geöffnet ist.
 suDebug on / suDebug off - Aktiviert oder deaktiviert die Debug-Protokollierung.
+
+Änderungsprotokoll:
+Version 1.1.0.0
+- Schaltfläche SAVE UNITS zur Einstellungsoberfläche im Spiel hinzugefügt.
+- Unterstützung zum direkten Speichern der aktuellen Einheiteneinstellungen für das geladene Spielstand-Profil hinzugefügt.
+- Konsolenbefehl suSaveCurrent als manuelle Ausweichmöglichkeit hinzugefügt.
+- Bestehende manuelle XML-Zuordnungen und eigene Profile bleiben unterstützt.
+
+Version 1.0.0.0
+- Erstveröffentlichung.
+- Einheiten- und Währungsprofile pro Spielstand hinzugefügt.
+- Standardprofile US, UK und EU hinzugefügt.
+- Konsolenbefehle für Status, Neuladen, manuelle Anwendung und Debug-Protokollierung hinzugefügt.
 
 GitHub-Link:
 https://github.com/SimGamerJen/FS25_SaveUnitProfiles
@@ -94,16 +116,27 @@ suReload - Recharge le fichier de configuration XML.
 suApply - Applique le profil configuré pour la sauvegarde actuelle.
 suApply UK / suApply US / suApply EU - Applique manuellement un profil spécifique.
 suSaveCurrent - Enregistre les paramètres d'unités actuels pour la sauvegarde chargée.
-suUiProbe - Journalise les informations de diagnostic de l'interface et de la barre de boutons pour l'écran Paramètres généraux.
-suUiProbe inject - Tente une injection de bouton de diagnostic en direct lorsque l'écran Paramètres généraux est ouvert.
 suDebug on / suDebug off - Active ou désactive la journalisation de débogage.
+
+Journal des modifications :
+Version 1.1.0.0
+- Ajout du bouton SAVE UNITS dans l'interface des paramètres du jeu.
+- Ajout de la prise en charge de l'enregistrement direct des paramètres d'unités actuels pour le profil de la sauvegarde chargée.
+- Ajout de la commande console suSaveCurrent comme solution manuelle de secours.
+- Les attributions XML manuelles existantes et les profils personnalisés restent pris en charge.
+
+Version 1.0.0.0
+- Première version.
+- Ajout des profils d'unités et de devise par sauvegarde.
+- Ajout des profils par défaut US, UK et EU.
+- Ajout des commandes console pour l'état, le rechargement, l'application manuelle et la journalisation de débogage.
 
 Lien GitHub :
 https://github.com/SimGamerJen/FS25_SaveUnitProfiles
 ]]></fr>
     </description>
-    <iconFilename>icon.dds</iconFilename>
-    <multiplayer supported="false" />
+    <iconFilename>icon_SaveUnitProfiles.dds</iconFilename>
+    <multiplayer supported="true" />
 
     <extraSourceFiles>
         <sourceFile filename="scripts/SU_Core.lua" />
