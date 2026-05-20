@@ -8,7 +8,7 @@ It is designed for players who switch between maps from different regions and wa
 
 Version `1.1.0.0` adds a **SAVE UNITS** button to the in-game Settings interface.
 
-This means you no longer need to manually edit the XML file for normal setup.
+This means you no longer need to manually edit the XML file for normal setup and you can have a custom setup not region specific.
 
 ### Recommended setup workflow
 
@@ -32,6 +32,8 @@ SAVEGAME_8
 and map that save slot to the saved unit settings automatically.
 
 The XML configuration system is still supported for advanced users and manual editing.
+
+<img width="3840" height="2160" alt="SaveUnitProfiles_General_Settings_Save_Button" src="https://github.com/user-attachments/assets/16ef1023-8710-4f2f-8eff-2696bf7e2336" />
 
 ## Features
 
