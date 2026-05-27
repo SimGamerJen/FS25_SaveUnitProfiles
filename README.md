@@ -11,7 +11,7 @@ Save Unit Profiles fixes that by applying a unit profile for the active savegame
 ## Current Version
 
 ```text
-Version: 1.2.0.0
+Version: 1.2.0.1
 ```
 
 ---
@@ -37,7 +37,7 @@ CH
 PL
 ```
 
-Selecting a profile immediately applies the profile to the current savegame and stores that mapping in the mod configuration.
+Selecting a profile assigns it to the current savegame and stores that mapping in the mod configuration. The active in-game unit settings are applied when you leave the Settings UI.
 
 The right-hand settings help pane shows what the selected profile means, including the country or region name and the unit choices used by that profile.
 
@@ -60,11 +60,11 @@ Time format: 24-hour
 
 - Native FS25 settings integration under **General Settings > Units**.
 - Per-savegame unit profile assignment.
-- Profile selection applies immediately when changed.
+- Profile selection is saved immediately and applied to the live game when leaving the Settings UI.
 - Built-in regional profiles using two-character profile codes.
 - Save-specific custom profile support using deterministic `SAVEGAME_##` profile names.
 - Right-hand tooltip/help text showing the selected profile’s country/region and unit setup.
-- Runtime refresh of the active game settings and visible Settings UI.
+- Runtime refresh of the active game settings after leaving the Settings UI.
 - XML configuration stored in the player’s `modSettings` folder.
 - Console commands retained for troubleshooting and manual setup.
 - No dependency on Additional Currencies or any other currency mod.
@@ -141,7 +141,7 @@ General Settings > Units
 4. Use the **Unit Profile** selector.
 5. Select the desired regional profile.
 
-The selected profile is applied immediately and saved for the current savegame.
+The selected profile is saved for the current savegame and applied to the live game when you leave the Settings UI.
 
 To save a custom setup:
 
@@ -254,6 +254,19 @@ Saves the current in-game unit settings as the current savegame’s custom `SAVE
 
 ## Changelog
 
+### 1.2.0.1
+
+#### Fixed
+
+- Improved live settings application after changing the Unit Profile from **General Settings > Units**.
+- Profile changes now apply correctly after leaving the Settings UI.
+- Reduced duplicate on-screen success notifications during normal profile selection.
+- Warning and error notifications remain available if a profile cannot be applied correctly.
+
+#### Changed
+
+- Normal successful profile changes now rely on the Settings UI and profile selector as confirmation, rather than repeated HUD notifications.
+
 ### 1.2.0.0
 
 #### Added
@@ -279,7 +292,7 @@ Saves the current in-game unit settings as the current savegame’s custom `SAVE
 - Existing XML mappings remain supported.
 - Manual XML configuration remains possible.
 - Console commands remain available for troubleshooting and manual setup.
-- Runtime refresh support remains in place so active game settings and the visible Settings UI update immediately.
+- Runtime refresh support remains in place so active game settings update after leaving the Settings UI.
 
 ### 1.1.0.0
 

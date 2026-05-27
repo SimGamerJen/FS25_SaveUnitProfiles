@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no" ?>
 <modDesc descVersion="109">
     <author>SimGamerJen</author>
-    <version>1.2.0.0</version>
+    <version>1.2.0.1</version>
     <title>
         <en>Save Unit Profiles</en>
         <de>Speichereinheiten-Profile</de>
@@ -16,7 +16,7 @@ The mod adds a native Unit Profile selector to the Farming Simulator 25 Settings
 
 General Settings > Units
 
-Changing the Unit Profile selector immediately applies the selected profile to the currently loaded savegame and updates the active in-game unit settings. No separate dialog is required, and normal players do not need to edit XML manually.
+Changing the Unit Profile selector assigns the selected profile to the currently loaded savegame and applies the active in-game unit settings when the Settings UI is closed. No separate dialog is required, and normal players do not need to edit XML manually.
 
 This is useful when switching between maps from different regions. For example, a North American savegame can use dollars, miles, Fahrenheit and acres, while a UK savegame can use pounds, miles, Celsius and acres, and a European savegame can use euros, kilometres, Celsius and hectares.
 
@@ -51,6 +51,12 @@ suSaveCurrent - Save the current unit settings for the loaded savegame.
 suDebug on / suDebug off - Enable or disable debug logging.
 
 Changelog:
+Version 1.2.0.1
+- Improved live settings application when changing Unit Profile from General Settings > Units.
+- Profile changes now apply correctly after leaving the Settings UI.
+- Reduced duplicate on-screen success notifications during normal profile selection.
+- Warning/error notifications remain available if a profile cannot be applied correctly.
+
 Version 1.2.0.0
 - Added native Unit Profile selector to General Settings > Units.
 - Added automatic apply-on-selection behaviour for unit profiles.
@@ -83,7 +89,7 @@ Der Mod fügt dem Einstellungsmenü von Farming Simulator 25 einen nativen Einhe
 
 Allgemeine Einstellungen > Einheiten
 
-Wenn ein Einheitenprofil ausgewählt wird, wird es sofort auf den aktuell geladenen Spielstand angewendet und die aktiven Einheiteneinstellungen im Spiel werden aktualisiert. Es ist kein separates Dialogfenster erforderlich, und normale Spieler müssen keine XML-Dateien manuell bearbeiten.
+Wenn ein Einheitenprofil ausgewählt wird, wird es dem aktuell geladenen Spielstand zugeordnet und die aktiven Einheiteneinstellungen im Spiel werden beim Verlassen der Einstellungsoberfläche angewendet. Es ist kein separates Dialogfenster erforderlich, und normale Spieler müssen keine XML-Dateien manuell bearbeiten.
 
 Dies ist nützlich, wenn Karten aus verschiedenen Regionen gespielt werden. Zum Beispiel kann ein nordamerikanischer Spielstand Dollar, Meilen, Fahrenheit und Acres verwenden, während ein britischer Spielstand Pfund, Meilen, Celsius und Acres verwendet und ein europäischer Spielstand Euro, Kilometer, Celsius und Hektar verwendet.
 
@@ -118,6 +124,12 @@ suSaveCurrent - Speichert die aktuellen Einheiteneinstellungen für den geladene
 suDebug on / suDebug off - Aktiviert oder deaktiviert die Debug-Protokollierung.
 
 Änderungsprotokoll:
+Version 1.2.0.1
+- Verbesserte Live-Anwendung der Einstellungen beim Ändern des Einheitenprofils unter Allgemeine Einstellungen > Einheiten.
+- Profiländerungen werden nun korrekt angewendet, nachdem die Einstellungsoberfläche verlassen wurde.
+- Doppelte Erfolgsmeldungen auf dem Bildschirm bei normaler Profilauswahl wurden reduziert.
+- Warn- und Fehlermeldungen bleiben verfügbar, falls ein Profil nicht korrekt angewendet werden kann.
+
 Version 1.2.0.0
 - Nativen Einheitenprofil-Wähler unter Allgemeine Einstellungen > Einheiten hinzugefügt.
 - Automatische Anwendung beim Auswählen eines Einheitenprofils hinzugefügt.
@@ -150,7 +162,7 @@ Le mod ajoute un sélecteur natif de profil d'unités dans le menu des paramètr
 
 Paramètres généraux > Unités
 
-Lorsque vous changez le profil d'unités, le profil sélectionné est immédiatement appliqué à la sauvegarde actuellement chargée et les paramètres d'unités actifs du jeu sont mis à jour. Aucune fenêtre séparée n'est nécessaire, et les joueurs n'ont pas besoin de modifier manuellement les fichiers XML pour une utilisation normale.
+Lorsque vous changez le profil d'unités, le profil sélectionné est attribué à la sauvegarde actuellement chargée et les paramètres d'unités actifs du jeu sont appliqués à la fermeture de l'interface des paramètres. Aucune fenêtre séparée n'est nécessaire, et les joueurs n'ont pas besoin de modifier manuellement les fichiers XML pour une utilisation normale.
 
 C'est utile lorsque vous jouez sur des cartes de différentes régions. Par exemple, une sauvegarde nord-américaine peut utiliser les dollars, les miles, les degrés Fahrenheit et les acres, tandis qu'une sauvegarde britannique peut utiliser les livres sterling, les miles, les degrés Celsius et les acres, et une sauvegarde européenne peut utiliser les euros, les kilomètres, les degrés Celsius et les hectares.
 
@@ -185,6 +197,12 @@ suSaveCurrent - Enregistre les paramètres d'unités actuels pour la sauvegarde 
 suDebug on / suDebug off - Active ou désactive la journalisation de débogage.
 
 Journal des modifications :
+Version 1.2.0.1
+- Amélioration de l'application en direct des paramètres lors du changement de profil d'unités dans Paramètres généraux > Unités.
+- Les changements de profil sont désormais correctement appliqués après la fermeture de l'interface des paramètres.
+- Réduction des notifications de succès affichées en double lors de la sélection normale d'un profil.
+- Les notifications d'avertissement et d'erreur restent disponibles si un profil ne peut pas être appliqué correctement.
+
 Version 1.2.0.0
 - Ajout d'un sélecteur natif de profil d'unités dans Paramètres généraux > Unités.
 - Ajout de l'application automatique lors de la sélection d'un profil d'unités.

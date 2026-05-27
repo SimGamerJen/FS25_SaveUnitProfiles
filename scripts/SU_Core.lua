@@ -16,7 +16,7 @@ SaveUnitProfiles = {}
 SaveUnitProfiles.MOD_NAME = g_currentModName or "FS25_SaveUnitProfiles"
 SaveUnitProfiles.MOD_DIR = g_currentModDirectory or ""
 SaveUnitProfiles.VERSION = "1.2.0.0"
-SaveUnitProfiles.BUILD_TAG = "20260527.31"
+SaveUnitProfiles.BUILD_TAG = "20260527.34"
 SaveUnitProfiles.config = nil
 SaveUnitProfiles.activeSlot = nil
 SaveUnitProfiles.activeProfileName = nil
@@ -597,15 +597,37 @@ function SaveUnitProfiles:setGameSetting(settingName, value)
         return false, "g_gameSettings unavailable"
     end
 
-    -- Do not call g_gameSettings:setValue() here. In FS25 some of the unit
-    -- settings can return true while still publishing through a nil MessageType,
-    -- which creates log warnings in MessageCenter. Direct assignment plus the
-    -- runtime/UI refresh path below is cleaner and matches how currency mods
-    -- update the live UI state.
     local details = {}
+    local setValueOk = false
     local candidates = self:getSettingCandidates(settingName)
-    local anyDirectOk = false
 
+    -- Use the real GameSettings setter first. This is the path FS25 expects when
+    -- Settings menu values need to become the active game values after the menu
+    -- closes. Direct assignment alone can be overwritten by the Settings UI.
+    if g_gameSettings.setValue ~= nil then
+        for _, key in ipairs(candidates) do
+            local callOk, result = pcall(function()
+                return g_gameSettings:setValue(key, value, true)
+            end)
+
+            details[#details + 1] = string.format("setValue(%s)=%s", tostring(key), tostring(callOk and result or ("error:" .. tostring(result))))
+
+            if callOk and result == true then
+                setValueOk = true
+            end
+
+            local current = self:getGameSetting(settingName)
+            if self:settingsValueMatches(current, value) then
+                details[#details + 1] = "verifiedAfterSetValue=" .. tostring(current)
+                return true, table.concat(details, ",")
+            end
+        end
+    else
+        details[#details + 1] = "setValue=unavailable"
+    end
+
+    -- Fallback for keys that FS25 exposes as direct fields.
+    local anyDirectOk = false
     for _, key in ipairs(candidates) do
         if type(key) == "string" then
             local directOk, directErr = pcall(function()
@@ -627,11 +649,7 @@ function SaveUnitProfiles:setGameSetting(settingName, value)
     details[#details + 1] = "after=" .. tostring(after)
     details[#details + 1] = "verified=" .. tostring(verified)
 
-    -- If direct assignment succeeded but getValue() still reports the old value,
-    -- return success and allow refreshRuntimeUnits() to update the active UI and
-    -- mission/i18n state. This avoids false partial-apply warnings for settings
-    -- that FS25 stores/caches through UI controls.
-    return verified or anyDirectOk, table.concat(details, ",")
+    return verified or setValueOk == true or anyDirectOk == true, table.concat(details, ",")
 end
 
 function SaveUnitProfiles:getCurrentUnitsAsProfile(profileName)
@@ -797,7 +815,6 @@ function SaveUnitProfiles:applyNamedProfileToActiveSave(profileName, reason)
     -- then apply again after the dialog/settings UI has finished its event cycle.
     self:applyProfile(profile, profileName, tostring(reason or "profile-dialog") .. "-immediate")
     self:scheduleProfileApply(profile, profileName, reason or "profile-dialog")
-    self:showNotification(string.format("Unit profile selected: %s", tostring(profileName)), false)
     return true
 end
 
@@ -809,8 +826,10 @@ function SaveUnitProfiles:scheduleProfileApply(profile, profileName, reason)
     self.pendingApplyProfile = profile
     self.pendingApplyProfileName = profileName
     self.pendingApplyReason = reason or "deferred-profile-dialog"
-    self.pendingApplyMs = 300
-    self.pendingApplyPasses = 2
+    self.pendingApplyMs = 500
+    -- Keep one delayed pass as a safety net after the Settings menu event cycle.
+    -- Repeated passes created duplicate HUD messages and did not improve reliability.
+    self.pendingApplyPasses = 1
 
     self:debugLog(string.format("Scheduled deferred apply for profile '%s' (%s)", tostring(profileName), tostring(reason)))
     return true
@@ -862,6 +881,8 @@ function SaveUnitProfiles:saveCurrentUnitsForActiveSave(reason, customProfileNam
         if self.settingsProfileSelector ~= nil then
             pcall(function() self:refreshSettingsRows() end)
         end
+        self.applySelectedProfileAfterSettingsClose = true
+        self:scheduleProfileApply(profile, profileName, "save-current-units")
 
         self:showNotification(string.format("Unit profile saved for savegame%d", tonumber(slot)), false)
         return true
@@ -1872,6 +1893,9 @@ function SaveUnitProfiles:onSettingsProfileSelectorChanged(state, button)
 
     -- Selecting a profile is the apply action. No separate APPLY row is needed.
     local ok = self:applyNamedProfileToActiveSave(name, "settings-units-profile-selector")
+    if ok then
+        self.applySelectedProfileAfterSettingsClose = true
+    end
     self:refreshSettingsRows()
     return ok
 end
@@ -2239,11 +2263,21 @@ function SaveUnitProfiles:applyProfile(profile, profileName, reason)
         table.concat(results, "; ")
     ))
 
-    if allOk then
-        self:showNotification(string.format("Unit profile applied: %s", tostring(self.activeProfileName)), false)
-    else
+    -- Quiet apply behaviour for the native Settings selector.
+    -- Successful profile changes are already visible in the Settings UI and persisted to XML,
+    -- so do not show HUD notifications while cycling profiles or when the Settings UI closes.
+    -- Keep a warning notification only if the apply path reports a genuine problem.
+    local reasonText = tostring(reason or "")
+    local suppressNotification = string.find(reasonText, "deferred", 1, true) ~= nil
+        or string.find(reasonText, "reapply", 1, true) ~= nil
+        or string.find(reasonText, "settings%-close", 1, false) ~= nil
+        or string.find(reasonText, "settings", 1, true) ~= nil
+
+    if not allOk then
         self:log("WARNING: One or more settings did not report success. Check whether FS25 recognises all setting names in this build.")
-        self:showNotification(string.format("Unit profile partly applied: %s", tostring(self.activeProfileName)), true)
+        if not suppressNotification then
+            self:showNotification(string.format("Unit profile partly applied: %s", tostring(self.activeProfileName)), true)
+        end
     end
 
     return allOk
@@ -2284,7 +2318,70 @@ function SaveUnitProfiles:loadMap(name)
     self:installUiHooks()
 end
 
+function SaveUnitProfiles:isSettingsGuiActive()
+    if g_gui == nil then
+        return false
+    end
+
+    local currentGui = g_gui.currentGui
+    local function containsSettings(value)
+        value = tostring(value or ""):lower()
+        return string.find(value, "settings", 1, true) ~= nil or string.find(value, "ingamemenu", 1, true) ~= nil
+    end
+
+    if currentGui ~= nil then
+        if containsSettings(currentGui.name) or containsSettings(currentGui.id) or containsSettings(currentGui.profile) then
+            return true
+        end
+        local target = currentGui.target
+        if target ~= nil then
+            if containsSettings(target.name) or containsSettings(target.id) or containsSettings(target.profile) or containsSettings(target.className) then
+                return true
+            end
+            if target.pageSettings ~= nil or target.pageSettingsGeneral ~= nil then
+                return true
+            end
+        end
+    end
+
+    if FocusManager ~= nil then
+        if containsSettings(FocusManager.currentGui) or containsSettings(FocusManager.currentGuiName) then
+            return true
+        end
+    end
+
+    return false
+end
+
+function SaveUnitProfiles:scheduleMappedProfileApply(reason)
+    if self.config == nil then
+        self:loadConfig()
+    end
+
+    local slot = self:getCurrentSaveSlot()
+    if slot == nil or self.config == nil or self.config.savegames == nil then
+        return false
+    end
+
+    local profileName = self.config.savegames[tonumber(slot)]
+    local profile = profileName ~= nil and self.config.profiles ~= nil and self.config.profiles[profileName] or nil
+    if profile == nil then
+        return false
+    end
+
+    self:scheduleProfileApply(profile, profileName, reason or "post-settings-close")
+    return true
+end
+
 function SaveUnitProfiles:update(dt)
+    local settingsActiveNow = self:isSettingsGuiActive()
+    if self.wasSettingsGuiActive == true and settingsActiveNow == false and self.applySelectedProfileAfterSettingsClose == true then
+        self.applySelectedProfileAfterSettingsClose = false
+        self:scheduleMappedProfileApply("settings-close-reapply")
+        self:debugLog("Settings UI closed after profile selection; scheduled mapped profile reapply")
+    end
+    self.wasSettingsGuiActive = settingsActiveNow
+
     if self.settingsRowsInjected ~= true then
         self:injectSettingsRows()
     end
@@ -2332,6 +2429,8 @@ function SaveUnitProfiles:deleteMap()
     self.settingsProfileSelector = nil
     self.settingsProfileNames = nil
     self.settingsSelectedProfileIndex = nil
+    self.wasSettingsGuiActive = false
+    self.applySelectedProfileAfterSettingsClose = false
 end
 
 
