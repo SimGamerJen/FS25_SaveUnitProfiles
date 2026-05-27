@@ -52,6 +52,8 @@ Field area: acres
 Time format: 24-hour
 ```
 
+<img width="3840" height="2160" alt="SaveUnitProfiles1 2 0 0_Predefined_Profile1_with_tooltip" src="https://github.com/user-attachments/assets/095df622-e87d-42ee-9c1f-06fe52ee0b36" />
+
 ---
 
 ## Main Features
@@ -121,6 +123,9 @@ This allows you to manually adjust the normal FS25 unit settings, then save that
 
 Custom profiles from other savegame slots are not shown in the selector for the active savegame.
 
+<img width="3840" height="2160" alt="SaveUnitProfiles1 2 0 0_Custom_Profile" src="https://github.com/user-attachments/assets/254aae2b-a8a2-45eb-ad62-bcf4975796de" />
+<img width="3840" height="2160" alt="SaveUnitProfiles1 2 0 0_Custom_Profile2" src="https://github.com/user-attachments/assets/1eb59a36-4218-4cd3-a8dd-1541e417ea5b" />
+
 ---
 
 ## How to Use
@@ -144,6 +149,8 @@ To save a custom setup:
 2. Click **Save Current Units**.
 3. The mod saves those settings as the current savegame’s `SAVEGAME_##` custom profile.
 4. The Unit Profile selector updates to that save-specific profile.
+
+<img width="3840" height="2160" alt="SaveUnitProfiles1 2 0 0_Predefined_Profile2_with_tooltip" src="https://github.com/user-attachments/assets/5fa3855c-974a-46c1-bdcc-b56ed5334fa0" />
 
 ---
 
