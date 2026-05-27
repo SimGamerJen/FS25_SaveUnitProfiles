@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no" ?>
-<modDesc descVersion="108">
+<modDesc descVersion="109">
     <author>SimGamerJen</author>
-    <version>1.1.0.0</version>
+    <version>1.2.0.0</version>
     <title>
         <en>Save Unit Profiles</en>
         <de>Speichereinheiten-Profile</de>
@@ -10,18 +10,33 @@
     <description>
         <en><![CDATA[
 Description:
-Save Unit Profiles automatically applies currency and measurement unit preferences based on the loaded savegame slot.
+Save Unit Profiles lets each savegame use its own currency and unit settings.
 
-This is useful when playing maps from different regions. For example, an American savegame can use dollars, miles, Fahrenheit and acres, while a UK savegame can use pounds, miles, Celsius and acres, and a European savegame can use euros, kilometres, Celsius and hectares.
+The mod adds a native Unit Profile selector to the Farming Simulator 25 Settings menu under:
+
+General Settings > Units
+
+Changing the Unit Profile selector immediately applies the selected profile to the currently loaded savegame and updates the active in-game unit settings. No separate dialog is required, and normal players do not need to edit XML manually.
+
+This is useful when switching between maps from different regions. For example, a North American savegame can use dollars, miles, Fahrenheit and acres, while a UK savegame can use pounds, miles, Celsius and acres, and a European savegame can use euros, kilometres, Celsius and hectares.
+
+Features:
+- Per-savegame currency and unit profiles.
+- Native Unit Profile selector in General Settings > Units.
+- Profile selection applies immediately to the current savegame.
+- Built-in regional profiles for multiple map locations and play styles.
+- Integrated currency support directly within Save Unit Profiles.
+- Save Current Units option for creating a custom profile from the current in-game settings.
+- Existing XML mappings remain supported for advanced/manual configuration.
 
 Configuration:
-After the mod has been loaded once, edit the configuration file:
+For normal use, open General Settings > Units and select the desired Unit Profile.
+
+The mod also stores its configuration here:
 
 modSettings/FS25_SaveUnitProfiles/saveUnitProfiles.xml
 
-Savegame mappings can be edited manually, or the current unit settings can be saved for the loaded savegame from the General Settings screen using the SAVE UNITS button where available.
-
-The included default profiles are US, UK and EU. Custom profiles can also be created in the same XML file.
+This file can still be edited manually by advanced users, but manual XML editing is no longer required for normal profile setup.
 
 Hotkeys:
 No hotkeys are required.
@@ -31,10 +46,20 @@ suStatus - Show current status and loaded settings.
 suReload - Reload the XML configuration file.
 suApply - Apply the configured profile for the current savegame.
 suApply UK / suApply US / suApply EU - Manually apply a specific profile.
+suProfile UK / suProfile US / suProfile EU / suProfile CA - Assign and apply a specific profile to the current savegame.
 suSaveCurrent - Save the current unit settings for the loaded savegame.
 suDebug on / suDebug off - Enable or disable debug logging.
 
 Changelog:
+Version 1.2.0.0
+- Added native Unit Profile selector to General Settings > Units.
+- Added automatic apply-on-selection behaviour for unit profiles.
+- Added integrated regional currency/profile support directly in Save Unit Profiles.
+- Added additional predefined regional profiles for more map locations and play styles.
+- Added Save Current Units option for creating custom profiles from the current settings.
+- Removed the need to manually edit XML for normal savegame profile setup.
+- Retained support for existing XML mappings, custom profiles and console commands.
+
 Version 1.1.0.0
 - Added SAVE UNITS button to the in-game Settings interface.
 - Added support for saving the current unit settings directly to the loaded savegame profile.
@@ -52,18 +77,33 @@ https://github.com/SimGamerJen/FS25_SaveUnitProfiles
 ]]></en>
         <de><![CDATA[
 Beschreibung:
-Save Unit Profiles wendet automatisch Währungs- und Maßeinheiteneinstellungen basierend auf dem geladenen Spielstand-Slot an.
+Save Unit Profiles ermöglicht es, für jeden Spielstand eigene Währungs- und Einheiteneinstellungen zu verwenden.
 
-Dies ist nützlich, wenn Karten aus verschiedenen Regionen gespielt werden. Zum Beispiel kann ein amerikanischer Spielstand Dollar, Meilen, Fahrenheit und Acres verwenden, während ein britischer Spielstand Pfund, Meilen, Celsius und Acres verwendet und ein europäischer Spielstand Euro, Kilometer, Celsius und Hektar verwendet.
+Der Mod fügt dem Einstellungsmenü von Farming Simulator 25 einen nativen Einheitenprofil-Wähler hinzu unter:
+
+Allgemeine Einstellungen > Einheiten
+
+Wenn ein Einheitenprofil ausgewählt wird, wird es sofort auf den aktuell geladenen Spielstand angewendet und die aktiven Einheiteneinstellungen im Spiel werden aktualisiert. Es ist kein separates Dialogfenster erforderlich, und normale Spieler müssen keine XML-Dateien manuell bearbeiten.
+
+Dies ist nützlich, wenn Karten aus verschiedenen Regionen gespielt werden. Zum Beispiel kann ein nordamerikanischer Spielstand Dollar, Meilen, Fahrenheit und Acres verwenden, während ein britischer Spielstand Pfund, Meilen, Celsius und Acres verwendet und ein europäischer Spielstand Euro, Kilometer, Celsius und Hektar verwendet.
+
+Funktionen:
+- Währungs- und Einheitenprofile pro Spielstand.
+- Nativer Einheitenprofil-Wähler unter Allgemeine Einstellungen > Einheiten.
+- Die Profilauswahl wird sofort auf den aktuellen Spielstand angewendet.
+- Integrierte regionale Profile für verschiedene Kartenregionen und Spielweisen.
+- Integrierte Währungsunterstützung direkt in Save Unit Profiles.
+- Option zum Speichern der aktuellen Einheiten als eigenes Profil.
+- Bestehende XML-Zuordnungen bleiben für fortgeschrittene/manuelle Konfiguration unterstützt.
 
 Konfiguration:
-Nachdem der Mod einmal geladen wurde, bearbeiten Sie die Konfigurationsdatei:
+Für die normale Verwendung öffnen Sie Allgemeine Einstellungen > Einheiten und wählen das gewünschte Einheitenprofil aus.
+
+Der Mod speichert seine Konfiguration außerdem hier:
 
 modSettings/FS25_SaveUnitProfiles/saveUnitProfiles.xml
 
-Spielstand-Zuordnungen können manuell bearbeitet werden. Wo verfügbar, können die aktuellen Einheiteneinstellungen auch über die Schaltfläche SAVE UNITS im Bildschirm Allgemeine Einstellungen für den geladenen Spielstand gespeichert werden.
-
-Die enthaltenen Standardprofile sind US, UK und EU. Eigene Profile können ebenfalls in derselben XML-Datei erstellt werden.
+Diese Datei kann von fortgeschrittenen Benutzern weiterhin manuell bearbeitet werden. Für die normale Profileinrichtung ist eine manuelle XML-Bearbeitung jedoch nicht mehr erforderlich.
 
 Tastenkombinationen:
 Es sind keine Tastenkombinationen erforderlich.
@@ -73,10 +113,20 @@ suStatus - Zeigt den aktuellen Status und die geladenen Einstellungen an.
 suReload - Lädt die XML-Konfigurationsdatei neu.
 suApply - Wendet das konfigurierte Profil für den aktuellen Spielstand an.
 suApply UK / suApply US / suApply EU - Wendet manuell ein bestimmtes Profil an.
+suProfile UK / suProfile US / suProfile EU / suProfile CA - Ordnet dem aktuellen Spielstand ein bestimmtes Profil zu und wendet es an.
 suSaveCurrent - Speichert die aktuellen Einheiteneinstellungen für den geladenen Spielstand.
 suDebug on / suDebug off - Aktiviert oder deaktiviert die Debug-Protokollierung.
 
 Änderungsprotokoll:
+Version 1.2.0.0
+- Nativen Einheitenprofil-Wähler unter Allgemeine Einstellungen > Einheiten hinzugefügt.
+- Automatische Anwendung beim Auswählen eines Einheitenprofils hinzugefügt.
+- Integrierte regionale Währungs- und Profilunterstützung direkt in Save Unit Profiles hinzugefügt.
+- Zusätzliche vordefinierte regionale Profile für weitere Kartenregionen und Spielweisen hinzugefügt.
+- Option zum Speichern der aktuellen Einheiten als eigenes Profil hinzugefügt.
+- Manuelle XML-Bearbeitung ist für die normale Spielstand-Profileinrichtung nicht mehr erforderlich.
+- Unterstützung für bestehende XML-Zuordnungen, eigene Profile und Konsolenbefehle bleibt erhalten.
+
 Version 1.1.0.0
 - Schaltfläche SAVE UNITS zur Einstellungsoberfläche im Spiel hinzugefügt.
 - Unterstützung zum direkten Speichern der aktuellen Einheiteneinstellungen für das geladene Spielstand-Profil hinzugefügt.
@@ -94,18 +144,33 @@ https://github.com/SimGamerJen/FS25_SaveUnitProfiles
 ]]></de>
         <fr><![CDATA[
 Description :
-Save Unit Profiles applique automatiquement les préférences de devise et d'unités de mesure en fonction de l'emplacement de sauvegarde chargé.
+Save Unit Profiles permet à chaque sauvegarde d'utiliser ses propres paramètres de devise et d'unités.
 
-C'est utile lorsque vous jouez sur des cartes de différentes régions. Par exemple, une sauvegarde américaine peut utiliser les dollars, les miles, les degrés Fahrenheit et les acres, tandis qu'une sauvegarde britannique peut utiliser les livres sterling, les miles, les degrés Celsius et les acres, et une sauvegarde européenne peut utiliser les euros, les kilomètres, les degrés Celsius et les hectares.
+Le mod ajoute un sélecteur natif de profil d'unités dans le menu des paramètres de Farming Simulator 25, sous :
+
+Paramètres généraux > Unités
+
+Lorsque vous changez le profil d'unités, le profil sélectionné est immédiatement appliqué à la sauvegarde actuellement chargée et les paramètres d'unités actifs du jeu sont mis à jour. Aucune fenêtre séparée n'est nécessaire, et les joueurs n'ont pas besoin de modifier manuellement les fichiers XML pour une utilisation normale.
+
+C'est utile lorsque vous jouez sur des cartes de différentes régions. Par exemple, une sauvegarde nord-américaine peut utiliser les dollars, les miles, les degrés Fahrenheit et les acres, tandis qu'une sauvegarde britannique peut utiliser les livres sterling, les miles, les degrés Celsius et les acres, et une sauvegarde européenne peut utiliser les euros, les kilomètres, les degrés Celsius et les hectares.
+
+Fonctionnalités :
+- Profils de devise et d'unités par sauvegarde.
+- Sélecteur natif de profil d'unités dans Paramètres généraux > Unités.
+- La sélection d'un profil s'applique immédiatement à la sauvegarde actuelle.
+- Profils régionaux intégrés pour plusieurs régions de cartes et styles de jeu.
+- Prise en charge des devises intégrée directement dans Save Unit Profiles.
+- Option Save Current Units pour créer un profil personnalisé à partir des paramètres actuels du jeu.
+- Les attributions XML existantes restent prises en charge pour la configuration avancée ou manuelle.
 
 Configuration :
-Après avoir chargé le mod une première fois, modifiez le fichier de configuration :
+Pour une utilisation normale, ouvrez Paramètres généraux > Unités et sélectionnez le profil d'unités souhaité.
+
+Le mod enregistre également sa configuration ici :
 
 modSettings/FS25_SaveUnitProfiles/saveUnitProfiles.xml
 
-Les attributions de sauvegarde peuvent être modifiées manuellement. Lorsque disponible, les paramètres d'unités actuels peuvent aussi être enregistrés pour la sauvegarde chargée depuis l'écran Paramètres généraux avec le bouton SAVE UNITS.
-
-Les profils par défaut inclus sont US, UK et EU. Des profils personnalisés peuvent également être créés dans le même fichier XML.
+Ce fichier peut toujours être modifié manuellement par les utilisateurs avancés, mais la modification manuelle du XML n'est plus nécessaire pour la configuration normale des profils.
 
 Raccourcis :
 Aucun raccourci n'est requis.
@@ -115,10 +180,20 @@ suStatus - Affiche l'état actuel et les paramètres chargés.
 suReload - Recharge le fichier de configuration XML.
 suApply - Applique le profil configuré pour la sauvegarde actuelle.
 suApply UK / suApply US / suApply EU - Applique manuellement un profil spécifique.
+suProfile UK / suProfile US / suProfile EU / suProfile CA - Attribue et applique un profil spécifique à la sauvegarde actuelle.
 suSaveCurrent - Enregistre les paramètres d'unités actuels pour la sauvegarde chargée.
 suDebug on / suDebug off - Active ou désactive la journalisation de débogage.
 
 Journal des modifications :
+Version 1.2.0.0
+- Ajout d'un sélecteur natif de profil d'unités dans Paramètres généraux > Unités.
+- Ajout de l'application automatique lors de la sélection d'un profil d'unités.
+- Ajout de la prise en charge intégrée des devises et profils régionaux directement dans Save Unit Profiles.
+- Ajout de profils régionaux prédéfinis supplémentaires pour davantage de régions de cartes et de styles de jeu.
+- Ajout de l'option Save Current Units pour créer des profils personnalisés à partir des paramètres actuels.
+- La modification manuelle du XML n'est plus nécessaire pour la configuration normale des profils de sauvegarde.
+- Les attributions XML existantes, les profils personnalisés et les commandes de console restent pris en charge.
+
 Version 1.1.0.0
 - Ajout du bouton SAVE UNITS dans l'interface des paramètres du jeu.
 - Ajout de la prise en charge de l'enregistrement direct des paramètres d'unités actuels pour le profil de la sauvegarde chargée.

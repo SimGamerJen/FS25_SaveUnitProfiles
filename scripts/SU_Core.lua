@@ -1,7 +1,7 @@
 --[[
     FS25_SaveUnitProfiles
-    ModVersion: 1.1.0.0
-    BuildTag: 20260520.6
+    ModVersion: 1.2.0.0
+    BuildTag: 20260527.31
 
     Purpose:
       Apply money/unit display preferences from a per-save XML profile.
@@ -14,8 +14,9 @@
 
 SaveUnitProfiles = {}
 SaveUnitProfiles.MOD_NAME = g_currentModName or "FS25_SaveUnitProfiles"
-SaveUnitProfiles.VERSION = "1.1.0.0"
-SaveUnitProfiles.BUILD_TAG = "20260520.6"
+SaveUnitProfiles.MOD_DIR = g_currentModDirectory or ""
+SaveUnitProfiles.VERSION = "1.2.0.0"
+SaveUnitProfiles.BUILD_TAG = "20260527.31"
 SaveUnitProfiles.config = nil
 SaveUnitProfiles.activeSlot = nil
 SaveUnitProfiles.activeProfileName = nil
@@ -24,6 +25,74 @@ SaveUnitProfiles.hasApplied = false
 SaveUnitProfiles.applyDelayMs = 1500
 SaveUnitProfiles.elapsedMs = 0
 SaveUnitProfiles.debug = false
+
+SaveUnitProfiles.MONEY_UNITS = {
+    [1]  = { name = "Euro",                symbol = "€",   prefix = false, isDefault = true  },
+    [2]  = { name = "Dollar",              symbol = "$",   prefix = true,  isDefault = true  },
+    [3]  = { name = "Pounds",              symbol = "£",   prefix = true,  isDefault = true  },
+    [4]  = { name = "Brazilian Real",      symbol = "R$",  prefix = true,  iconSymbol = "R$"  },
+    [5]  = { name = "Chinese Yuan",        symbol = "CN¥", prefix = true,  iconSymbol = "CN¥" },
+    [6]  = { name = "Czech Koruna",        symbol = "Kč",  prefix = false, iconSymbol = "Kč"  },
+    [7]  = { name = "Hungarian Forint",    symbol = "Ft",  prefix = false, iconSymbol = "Ft"  },
+    [8]  = { name = "Japanese Yen",        symbol = "¥",   prefix = true,  iconSymbol = "¥"   },
+    [9]  = { name = "Norwegian Krone",     symbol = "kr",  prefix = false, iconSymbol = "kr"  },
+    [10] = { name = "Polish Złoty",        symbol = "zł",  prefix = false, iconSymbol = "PLN" },
+    [11] = { name = "Romanian Leu",        symbol = "lei", prefix = false, iconSymbol = "lei" },
+    [12] = { name = "Russian Ruble",       symbol = "руб", prefix = false, iconSymbol = "руб" },
+    [13] = { name = "South Korean Won",    symbol = "₩",   prefix = true,  iconSymbol = "₩"   },
+    [14] = { name = "Swiss Franc",         symbol = "CHF", prefix = true,  iconSymbol = "CHF" },
+    [15] = { name = "Turkish Lira",        symbol = "TL",  prefix = true,  iconSymbol = "TL"  },
+    [16] = { name = "Ukrainian Hryvnia",   symbol = "грн", prefix = false, iconSymbol = "грн" }
+}
+
+SaveUnitProfiles.BUILT_IN_PROFILES = {
+    { name = "US", label = "United States", money = 2, miles = true,  fahrenheit = true,  acre = true,  use24HourTime = false },
+    { name = "UK", label = "United Kingdom", money = 3, miles = true,  fahrenheit = false, acre = true,  use24HourTime = true  },
+    { name = "EU", label = "European Union", money = 1, miles = false, fahrenheit = false, acre = false, use24HourTime = true  },
+    { name = "CA", label = "Canada", money = 2, miles = false, fahrenheit = false, acre = true,  use24HourTime = true  },
+    { name = "BR", label = "Brazil", money = 4, miles = false, fahrenheit = false, acre = false, use24HourTime = true },
+    { name = "CN", label = "China", money = 5, miles = false, fahrenheit = false, acre = false, use24HourTime = true },
+    { name = "CZ", label = "Czechia", money = 6, miles = false, fahrenheit = false, acre = false, use24HourTime = true },
+    { name = "HU", label = "Hungary", money = 7, miles = false, fahrenheit = false, acre = false, use24HourTime = true },
+    { name = "JP", label = "Japan", money = 8, miles = false, fahrenheit = false, acre = false, use24HourTime = true },
+    { name = "NO", label = "Norway", money = 9, miles = false, fahrenheit = false, acre = false, use24HourTime = true },
+    { name = "PL", label = "Poland", money = 10, miles = false, fahrenheit = false, acre = false, use24HourTime = true },
+    { name = "RO", label = "Romania", money = 11, miles = false, fahrenheit = false, acre = false, use24HourTime = true },
+    { name = "RU", label = "Russia", money = 12, miles = false, fahrenheit = false, acre = false, use24HourTime = true },
+    { name = "KR", label = "South Korea", money = 13, miles = false, fahrenheit = false, acre = false, use24HourTime = true },
+    { name = "CH", label = "Switzerland", money = 14, miles = false, fahrenheit = false, acre = false, use24HourTime = true },
+    { name = "TR", label = "Turkey", money = 15, miles = false, fahrenheit = false, acre = false, use24HourTime = true },
+    { name = "UA", label = "Ukraine", money = 16, miles = false, fahrenheit = false, acre = false, use24HourTime = true }
+}
+
+function SaveUnitProfiles:getBuiltInProfileLabel(profileName)
+    profileName = tostring(profileName or "")
+    for _, builtIn in ipairs(self.BUILT_IN_PROFILES or {}) do
+        if tostring(builtIn.name or "") == profileName then
+            return builtIn.label
+        end
+    end
+    return nil
+end
+
+function SaveUnitProfiles:getProfileFriendlyNameByName(profileName)
+    profileName = tostring(profileName or "")
+
+    local builtInLabel = self:getBuiltInProfileLabel(profileName)
+    if builtInLabel ~= nil and tostring(builtInLabel) ~= "" then
+        return string.format("%s - %s", profileName, tostring(builtInLabel))
+    end
+
+    if self:isSavegameGeneratedProfileName(profileName) then
+        local slot = string.match(profileName, "^SAVEGAME_(%d+)$")
+        if slot ~= nil then
+            return string.format("%s - custom profile for savegame%s", profileName, tostring(slot))
+        end
+    end
+
+    return profileName
+end
+
 
 local function suBoolToString(value)
     if value == nil then
@@ -59,14 +128,16 @@ end
 
 function SaveUnitProfiles:moneyName(value)
     value = tonumber(value)
-    if value == 1 then
-        return "Euro"
-    elseif value == 2 then
-        return "Dollar"
-    elseif value == 3 then
-        return "Pounds"
+    local unit = self:getMoneyUnitDefinition(value)
+    if unit ~= nil then
+        return unit.name or unit.symbol or tostring(value)
     end
     return "Unknown"
+end
+
+function SaveUnitProfiles:getMoneyUnitDefinition(value)
+    value = tonumber(value) or 1
+    return self.MONEY_UNITS[value]
 end
 
 function SaveUnitProfiles:showNotification(message, isWarning)
@@ -105,26 +176,9 @@ function SaveUnitProfiles:ensureDefaultConfig()
         return
     end
 
-    setXMLString(xml, "saveUnitProfiles.profiles.profile(0)#name", "US")
-    setXMLInt(xml,    "saveUnitProfiles.profiles.profile(0).money", 2)
-    setXMLBool(xml,   "saveUnitProfiles.profiles.profile(0).miles", true)
-    setXMLBool(xml,   "saveUnitProfiles.profiles.profile(0).fahrenheit", true)
-    setXMLBool(xml,   "saveUnitProfiles.profiles.profile(0).acre", true)
-    setXMLBool(xml,   "saveUnitProfiles.profiles.profile(0).use24HourTime", false)
-
-    setXMLString(xml, "saveUnitProfiles.profiles.profile(1)#name", "UK")
-    setXMLInt(xml,    "saveUnitProfiles.profiles.profile(1).money", 3)
-    setXMLBool(xml,   "saveUnitProfiles.profiles.profile(1).miles", true)
-    setXMLBool(xml,   "saveUnitProfiles.profiles.profile(1).fahrenheit", false)
-    setXMLBool(xml,   "saveUnitProfiles.profiles.profile(1).acre", true)
-    setXMLBool(xml,   "saveUnitProfiles.profiles.profile(1).use24HourTime", true)
-
-    setXMLString(xml, "saveUnitProfiles.profiles.profile(2)#name", "EU")
-    setXMLInt(xml,    "saveUnitProfiles.profiles.profile(2).money", 1)
-    setXMLBool(xml,   "saveUnitProfiles.profiles.profile(2).miles", false)
-    setXMLBool(xml,   "saveUnitProfiles.profiles.profile(2).fahrenheit", false)
-    setXMLBool(xml,   "saveUnitProfiles.profiles.profile(2).acre", false)
-    setXMLBool(xml,   "saveUnitProfiles.profiles.profile(2).use24HourTime", true)
+    for i, profile in ipairs(self.BUILT_IN_PROFILES) do
+        self:writeProfileValues(xml, i - 1, profile)
+    end
 
     setXMLInt(xml,    "saveUnitProfiles.savegames.savegame(0)#slot", 1)
     setXMLString(xml, "saveUnitProfiles.savegames.savegame(0)#profile", "UK")
@@ -144,6 +198,7 @@ function SaveUnitProfiles:readProfile(xml, index)
 
     return {
         name = name,
+        label = self:getBuiltInProfileLabel(name),
         money = getXMLInt(xml, base .. ".money"),
         miles = getXMLBool(xml, base .. ".miles"),
         fahrenheit = getXMLBool(xml, base .. ".fahrenheit"),
@@ -152,8 +207,36 @@ function SaveUnitProfiles:readProfile(xml, index)
     }
 end
 
-function SaveUnitProfiles:loadConfig()
+
+function SaveUnitProfiles:ensureBuiltInProfilesInConfig()
     self:ensureDefaultConfig()
+
+    local path = self:getConfigPath()
+    local xml = loadXMLFile("saveUnitProfiles", path)
+    if xml == 0 or xml == nil then
+        self:log("ERROR: Could not open config to check built-in profiles: " .. tostring(path))
+        return false
+    end
+
+    local changed = false
+    for _, builtIn in ipairs(self.BUILT_IN_PROFILES) do
+        local index, nextIndex = self:findProfileIndex(xml, builtIn.name)
+        if index == nil then
+            self:writeProfileValues(xml, nextIndex or 0, builtIn)
+            self:log("Added missing built-in unit profile: " .. tostring(builtIn.name))
+            changed = true
+        end
+    end
+
+    if changed then
+        saveXMLFile(xml)
+    end
+    delete(xml)
+    return true
+end
+
+function SaveUnitProfiles:loadConfig()
+    self:ensureBuiltInProfilesInConfig()
 
     local path = self:getConfigPath()
     local xml = loadXMLFile("saveUnitProfiles", path)
@@ -247,17 +330,308 @@ function SaveUnitProfiles:getProfileForSlot(slot)
     return self.config.profiles[profileName], profileName
 end
 
+function SaveUnitProfiles:addCandidate(candidates, value)
+    if value == nil then
+        return
+    end
+
+    for _, existing in ipairs(candidates) do
+        if existing == value then
+            return
+        end
+    end
+
+    candidates[#candidates + 1] = value
+end
+
+function SaveUnitProfiles:getSettingCandidates(settingName)
+    local candidates = {}
+    local setting = GameSettings ~= nil and GameSettings.SETTING or nil
+
+    if setting ~= nil then
+        if settingName == "moneyUnit" then
+            self:addCandidate(candidates, setting.MONEY_UNIT)
+            self:addCandidate(candidates, setting.MONEY)
+        elseif settingName == "useMiles" then
+            self:addCandidate(candidates, setting.USE_MILES)
+            self:addCandidate(candidates, setting.MILES)
+        elseif settingName == "useFahrenheit" then
+            self:addCandidate(candidates, setting.USE_FAHRENHEIT)
+            self:addCandidate(candidates, setting.FAHRENHEIT)
+        elseif settingName == "useAcre" then
+            self:addCandidate(candidates, setting.USE_ACRE)
+            self:addCandidate(candidates, setting.ACRE)
+        elseif settingName == "use24HourTime" then
+            self:addCandidate(candidates, setting.USE_24_HOUR_TIME)
+            self:addCandidate(candidates, setting.USE_24H_TIME)
+            self:addCandidate(candidates, setting.USE_24_HOUR)
+            self:addCandidate(candidates, setting.TIME_FORMAT_24H)
+        end
+    end
+
+    self:addCandidate(candidates, settingName)
+    return candidates
+end
+
+
+function SaveUnitProfiles:getCurrentMoneyUnit()
+    return tonumber(self:getGameSetting("moneyUnit")) or tonumber(self.currentRuntimeMoneyUnit) or 1
+end
+
+function SaveUnitProfiles:getIntegratedCurrency(value)
+    value = tonumber(value) or self:getCurrentMoneyUnit()
+    return self.MONEY_UNITS[value]
+end
+
+function SaveUnitProfiles:getIntegratedCurrencySymbol(value, useShort, superFunc, i18n)
+    local currency = self:getIntegratedCurrency(value)
+    if currency == nil then
+        if superFunc ~= nil then
+            return superFunc(i18n, useShort)
+        end
+        return "?"
+    end
+
+    if currency.isDefault and superFunc ~= nil then
+        return superFunc(i18n, useShort)
+    end
+
+    if useShort and currency.iconSymbol ~= nil then
+        return currency.iconSymbol
+    end
+
+    return currency.symbol or currency.name or "?"
+end
+
+function SaveUnitProfiles:installIntegratedCurrencySupport()
+    if self.currencySupportInstalled then
+        return
+    end
+
+    self.currencySupportInstalled = true
+
+    self.usingIntegratedCurrencySupport = true
+    self:extendMoneyUnitSelectorTexts()
+    self:patchCurrencyFormatting()
+    self:log("Integrated extended currencies registered.")
+end
+
+function SaveUnitProfiles:getMoneyUnitTexts()
+    local texts = {}
+    local i = 1
+    while self.MONEY_UNITS[i] ~= nil do
+        texts[i] = self.MONEY_UNITS[i].name or tostring(i)
+        i = i + 1
+    end
+    return texts
+end
+
+function SaveUnitProfiles:installMoneyUnitClickCallback(element)
+    if element == nil or element.suMoneyUnitCallbackInstalled == true then
+        return false
+    end
+
+    element.suOriginalOnClickCallback = element.onClickCallback
+    element.onClickCallback = function(optionElement, state, ...)
+        SaveUnitProfiles:onMoneyUnitClicked(optionElement, state, ...)
+    end
+    element.suMoneyUnitCallbackInstalled = true
+    return true
+end
+
+function SaveUnitProfiles:onMoneyUnitClicked(optionElement, state, ...)
+    local money = tonumber(state) or 1
+    self.currentRuntimeMoneyUnit = money
+
+    if g_gameSettings ~= nil then
+        local candidates = self:getSettingCandidates("moneyUnit")
+        for _, key in ipairs(candidates or {}) do
+            if type(key) == "string" then
+                pcall(function()
+                    g_gameSettings[key] = money
+                end)
+            end
+        end
+    end
+
+    if g_i18n ~= nil and g_i18n.setMoneyUnit ~= nil then
+        pcall(function() g_i18n:setMoneyUnit(money) end)
+    end
+
+    if g_currentMission ~= nil and g_currentMission.setMoneyUnit ~= nil then
+        pcall(function() g_currentMission:setMoneyUnit(money) end)
+    end
+end
+
+function SaveUnitProfiles:extendMoneyUnitElement(element, label)
+    if element == nil then
+        return false
+    end
+
+    local texts = self:getMoneyUnitTexts()
+    if element.setTexts ~= nil then
+        local ok, err = pcall(function()
+            element:setTexts(texts)
+        end)
+        if not ok then
+            self:debugLog("Could not set money unit texts on " .. tostring(label) .. ": " .. tostring(err))
+            return false
+        end
+    else
+        element.texts = texts
+    end
+
+    self:installMoneyUnitClickCallback(element)
+    return true
+end
+
+function SaveUnitProfiles:extendMoneyUnitSelectorTexts()
+    if g_inGameMenu ~= nil then
+        self:extendMoneyUnitElement(g_inGameMenu.multiMoneyUnit, "g_inGameMenu.multiMoneyUnit")
+        self:extendMoneyUnitElement(g_inGameMenu.moneyElement, "g_inGameMenu.moneyElement")
+    end
+
+    local pageSettings = self:getPageSettings()
+    if pageSettings ~= nil then
+        self:extendMoneyUnitElement(pageSettings.multiMoneyUnit, "pageSettings.multiMoneyUnit")
+        self:extendMoneyUnitElement(pageSettings.moneyElement, "pageSettings.moneyElement")
+
+        -- The base settings page maps option controls back to GameSettings keys.
+        -- For extended currencies, direct assignment and runtime refresh are safer,
+        -- so remove the mapping if present and let our callback handle money unit changes.
+        if pageSettings.optionMapping ~= nil and pageSettings.multiMoneyUnit ~= nil then
+            pageSettings.optionMapping[pageSettings.multiMoneyUnit] = nil
+        end
+    end
+end
+
+function SaveUnitProfiles:patchCurrencyFormatting()
+    if g_i18n == nil then
+        return false
+    end
+
+    local mt = getmetatable(g_i18n)
+    if mt == nil or mt.__index == nil then
+        return false
+    end
+
+    local envI18n = mt.__index
+
+    if envI18n.suOriginalGetCurrencySymbol == nil and envI18n.getCurrencySymbol ~= nil then
+        envI18n.suOriginalGetCurrencySymbol = envI18n.getCurrencySymbol
+        envI18n.getCurrencySymbol = function(i18n, useShort)
+            local money = SaveUnitProfiles.currentRuntimeMoneyUnit or SaveUnitProfiles:getCurrentMoneyUnit()
+            return SaveUnitProfiles:getIntegratedCurrencySymbol(money, useShort, envI18n.suOriginalGetCurrencySymbol, i18n)
+        end
+    end
+
+    if envI18n.suOriginalFormatMoney == nil and envI18n.formatMoney ~= nil then
+        envI18n.suOriginalFormatMoney = envI18n.formatMoney
+        envI18n.formatMoney = function(i18n, number, precision, addCurrency, prefixCurrencySymbol)
+            local money = SaveUnitProfiles.currentRuntimeMoneyUnit or SaveUnitProfiles:getCurrentMoneyUnit()
+            local currency = SaveUnitProfiles:getIntegratedCurrency(money)
+            if currency ~= nil and not currency.isDefault and (addCurrency == nil or addCurrency == true) then
+                prefixCurrencySymbol = currency.prefix == true
+            end
+            return envI18n.suOriginalFormatMoney(i18n, number, precision, addCurrency, prefixCurrencySymbol)
+        end
+    end
+
+    return true
+end
+
+function SaveUnitProfiles:getGameSetting(settingName)
+    if g_gameSettings == nil then
+        return nil
+    end
+
+    local candidates = self:getSettingCandidates(settingName)
+
+    if g_gameSettings.getValue ~= nil then
+        for _, key in ipairs(candidates) do
+            local ok, result = pcall(function()
+                return g_gameSettings:getValue(key)
+            end)
+            if ok and result ~= nil then
+                return result
+            end
+        end
+    end
+
+    for _, key in ipairs(candidates) do
+        if type(key) == "string" then
+            local ok, result = pcall(function()
+                return g_gameSettings[key]
+            end)
+            if ok and result ~= nil then
+                return result
+            end
+        end
+    end
+
+    return nil
+end
+
+function SaveUnitProfiles:settingsValueMatches(actual, expected)
+    if expected == nil then
+        return true
+    end
+
+    if type(expected) == "boolean" then
+        return actual == expected
+    end
+
+    if type(expected) == "number" then
+        return tonumber(actual) == tonumber(expected)
+    end
+
+    return tostring(actual) == tostring(expected)
+end
+
 function SaveUnitProfiles:setGameSetting(settingName, value)
     if value == nil then
         return true, "skipped:nil"
     end
 
-    if g_gameSettings == nil or g_gameSettings.setValue == nil then
+    if g_gameSettings == nil then
         return false, "g_gameSettings unavailable"
     end
 
-    local ok = g_gameSettings:setValue(settingName, value, true)
-    return ok == true, tostring(ok)
+    -- Do not call g_gameSettings:setValue() here. In FS25 some of the unit
+    -- settings can return true while still publishing through a nil MessageType,
+    -- which creates log warnings in MessageCenter. Direct assignment plus the
+    -- runtime/UI refresh path below is cleaner and matches how currency mods
+    -- update the live UI state.
+    local details = {}
+    local candidates = self:getSettingCandidates(settingName)
+    local anyDirectOk = false
+
+    for _, key in ipairs(candidates) do
+        if type(key) == "string" then
+            local directOk, directErr = pcall(function()
+                g_gameSettings[key] = value
+            end)
+            details[#details + 1] = string.format("direct(%s)=%s", tostring(key), tostring(directOk and "ok" or ("error:" .. tostring(directErr))))
+            anyDirectOk = anyDirectOk or directOk
+
+            local current = self:getGameSetting(settingName)
+            if self:settingsValueMatches(current, value) then
+                details[#details + 1] = "verifiedAfterDirect=" .. tostring(current)
+                return true, table.concat(details, ",")
+            end
+        end
+    end
+
+    local after = self:getGameSetting(settingName)
+    local verified = self:settingsValueMatches(after, value)
+    details[#details + 1] = "after=" .. tostring(after)
+    details[#details + 1] = "verified=" .. tostring(verified)
+
+    -- If direct assignment succeeded but getValue() still reports the old value,
+    -- return success and allow refreshRuntimeUnits() to update the active UI and
+    -- mission/i18n state. This avoids false partial-apply warnings for settings
+    -- that FS25 stores/caches through UI controls.
+    return verified or anyDirectOk, table.concat(details, ",")
 end
 
 function SaveUnitProfiles:getCurrentUnitsAsProfile(profileName)
@@ -268,11 +642,11 @@ function SaveUnitProfiles:getCurrentUnitsAsProfile(profileName)
 
     return {
         name = profileName,
-        money = tonumber(g_gameSettings:getValue("moneyUnit")),
-        miles = g_gameSettings:getValue("useMiles"),
-        fahrenheit = g_gameSettings:getValue("useFahrenheit"),
-        acre = g_gameSettings:getValue("useAcre"),
-        use24HourTime = g_gameSettings:getValue("use24HourTime")
+        money = tonumber(self:getGameSetting("moneyUnit")),
+        miles = self:getGameSetting("useMiles"),
+        fahrenheit = self:getGameSetting("useFahrenheit"),
+        acre = self:getGameSetting("useAcre"),
+        use24HourTime = self:getGameSetting("use24HourTime")
     }
 end
 
@@ -353,7 +727,96 @@ function SaveUnitProfiles:saveProfileForSlot(slot, profile)
     return true
 end
 
-function SaveUnitProfiles:saveCurrentUnitsForActiveSave(reason)
+
+function SaveUnitProfiles:saveMappingForSlot(slot, profileName)
+    if slot == nil or profileName == nil or tostring(profileName) == "" then
+        return false
+    end
+
+    self:ensureDefaultConfig()
+
+    local path = self:getConfigPath()
+    local xml = loadXMLFile("saveUnitProfiles", path)
+    if xml == 0 or xml == nil then
+        self:log("ERROR: Could not open config for mapping write: " .. tostring(path))
+        return false
+    end
+
+    local savegameIndex, nextSavegameIndex = self:findSavegameIndex(xml, slot)
+    if savegameIndex == nil then
+        savegameIndex = nextSavegameIndex or 0
+    end
+
+    local base = string.format("saveUnitProfiles.savegames.savegame(%d)", savegameIndex)
+    setXMLInt(xml, base .. "#slot", tonumber(slot))
+    setXMLString(xml, base .. "#profile", tostring(profileName))
+
+    saveXMLFile(xml)
+    delete(xml)
+
+    self:loadConfig()
+    return true
+end
+
+function SaveUnitProfiles:applyNamedProfileToActiveSave(profileName, reason)
+    if self.config == nil then
+        self:loadConfig()
+    end
+
+    profileName = suTrim(profileName)
+    if profileName == nil or profileName == "" then
+        self:showNotification("No unit profile selected", true)
+        return false
+    end
+
+    local profile = self.config ~= nil and self.config.profiles[profileName] or nil
+    if profile == nil then
+        self:log("ERROR: No profile named '" .. tostring(profileName) .. "'.")
+        self:showNotification("Unit profile not found: " .. tostring(profileName), true)
+        return false
+    end
+
+    local slot = self:getCurrentSaveSlot()
+    if slot == nil then
+        self:log("ERROR: Could not detect active savegame slot; profile was not assigned.")
+        self:showNotification("Could not assign unit profile: no savegame slot detected", true)
+        return false
+    end
+
+    local saved = self:saveMappingForSlot(slot, profileName)
+    if not saved then
+        self:showNotification("Could not save unit profile mapping", true)
+        return false
+    end
+
+    self.activeSlot = slot
+    self.activeProfileName = profileName
+    self:log(string.format("Assigned profile '%s' to savegame%d (%s)", tostring(profileName), tonumber(slot), tostring(reason or "manual")))
+
+    -- Apply immediately so console/status/HUD reflect the selected preset at once,
+    -- then apply again after the dialog/settings UI has finished its event cycle.
+    self:applyProfile(profile, profileName, tostring(reason or "profile-dialog") .. "-immediate")
+    self:scheduleProfileApply(profile, profileName, reason or "profile-dialog")
+    self:showNotification(string.format("Unit profile selected: %s", tostring(profileName)), false)
+    return true
+end
+
+function SaveUnitProfiles:scheduleProfileApply(profile, profileName, reason)
+    if profile == nil then
+        return false
+    end
+
+    self.pendingApplyProfile = profile
+    self.pendingApplyProfileName = profileName
+    self.pendingApplyReason = reason or "deferred-profile-dialog"
+    self.pendingApplyMs = 300
+    self.pendingApplyPasses = 2
+
+    self:debugLog(string.format("Scheduled deferred apply for profile '%s' (%s)", tostring(profileName), tostring(reason)))
+    return true
+end
+
+function SaveUnitProfiles:saveCurrentUnitsForActiveSave(reason, customProfileName)
     local slot = self:getCurrentSaveSlot()
     if slot == nil then
         self:log("ERROR: Could not detect active savegame slot; current unit settings were not saved.")
@@ -361,7 +824,10 @@ function SaveUnitProfiles:saveCurrentUnitsForActiveSave(reason)
         return false
     end
 
-    local profileName = string.format("SAVEGAME_%d", tonumber(slot))
+    local profileName = suTrim(customProfileName)
+    if profileName == nil or profileName == "" then
+        profileName = string.format("SAVEGAME_%d", tonumber(slot))
+    end
     local profile = self:getCurrentUnitsAsProfile(profileName)
     if profile == nil then
         self:showNotification("Could not save unit profile: settings unavailable", true)
@@ -373,6 +839,15 @@ function SaveUnitProfiles:saveCurrentUnitsForActiveSave(reason)
         self.activeSlot = slot
         self.activeProfileName = profileName
         self.lastApplyOk = true
+
+        -- Keep the in-memory config and native Units selector in sync immediately.
+        -- Without this, the XML is correct but the selector can remain on the
+        -- previously selected predefined profile until the next reload.
+        self.config = self.config or { profiles = {}, savegames = {} }
+        self.config.profiles = self.config.profiles or {}
+        self.config.savegames = self.config.savegames or {}
+        self.config.profiles[profileName] = profile
+        self.config.savegames[tonumber(slot)] = profileName
         self:log(string.format("Saved current unit settings as profile '%s' for savegame%d (%s): money=%s (%s), miles=%s, fahrenheit=%s, acre=%s, use24HourTime=%s",
             profileName,
             tonumber(slot),
@@ -384,6 +859,10 @@ function SaveUnitProfiles:saveCurrentUnitsForActiveSave(reason)
             suBoolToString(profile.acre),
             suBoolToString(profile.use24HourTime)
         ))
+        if self.settingsProfileSelector ~= nil then
+            pcall(function() self:refreshSettingsRows() end)
+        end
+
         self:showNotification(string.format("Unit profile saved for savegame%d", tonumber(slot)), false)
         return true
     end
@@ -392,6 +871,582 @@ function SaveUnitProfiles:saveCurrentUnitsForActiveSave(reason)
     return false
 end
 
+
+
+function SaveUnitProfiles:getProfileDisplayLabel(profile)
+    if profile == nil then
+        return "Unknown"
+    end
+
+    local currency = self:getCurrencyLabel(profile.money)
+
+    local speed = profile.miles and "mph" or "km/h"
+    local temp = profile.fahrenheit and "°F" or "°C"
+    local area = profile.acre and "ac" or "ha"
+    local clock = profile.use24HourTime and "24h" or "12h"
+
+    return string.format("%s - %s, %s, %s, %s, %s", tostring(profile.name), currency, speed, temp, area, clock)
+end
+
+function SaveUnitProfiles:getSortedProfileNames()
+    if self.config == nil then
+        self:loadConfig()
+    end
+
+    local names = {}
+    if self.config ~= nil and self.config.profiles ~= nil then
+        for name, _ in pairs(self.config.profiles) do
+            names[#names + 1] = name
+        end
+    end
+
+    table.sort(names, function(a, b)
+        local order = {US = 1, UK = 2, EU = 3, CA = 4}
+        local oa = order[a] or 1000
+        local ob = order[b] or 1000
+        if oa == ob then
+            return tostring(a) < tostring(b)
+        end
+        return oa < ob
+    end)
+
+    return names
+end
+
+function SaveUnitProfiles:getBuiltInProfileOrderMap()
+    local order = {}
+    for i, profile in ipairs(self.BUILT_IN_PROFILES or {}) do
+        order[profile.name] = i
+    end
+    return order
+end
+
+function SaveUnitProfiles:getMaxMoneyUnit()
+    local count = 0
+    while self.MONEY_UNITS[count + 1] ~= nil do
+        count = count + 1
+    end
+    return math.max(count, 3)
+end
+
+function SaveUnitProfiles:isProfileSupported(profile)
+    if profile == nil then
+        return false
+    end
+
+    local money = tonumber(profile.money) or 1
+    return money >= 1 and money <= self:getMaxMoneyUnit()
+end
+
+function SaveUnitProfiles:isSavegameGeneratedProfileName(name)
+    return string.match(tostring(name or ""), "^SAVEGAME_%d+$") ~= nil
+end
+
+function SaveUnitProfiles:getSelectableProfileNames()
+    if self.config == nil then
+        self:loadConfig()
+    end
+
+    local names = {}
+    if self.config ~= nil and self.config.profiles ~= nil then
+        for name, profile in pairs(self.config.profiles) do
+            local profileName = tostring(name or "")
+            local isGenerated = self:isSavegameGeneratedProfileName(profileName)
+            if not isGenerated and self:isProfileSupported(profile) then
+                names[#names + 1] = profileName
+            end
+        end
+
+        -- Savegame-specific custom profiles are intentionally scoped to their own
+        -- save slot. Show only the current savegame's generated profile, e.g.
+        -- SAVEGAME_17, and hide generated profiles for other saves.
+        local slot = self:getCurrentSaveSlot()
+        if slot ~= nil then
+            local currentGeneratedName = string.format("SAVEGAME_%d", tonumber(slot))
+            local currentGeneratedProfile = self.config.profiles[currentGeneratedName]
+            if currentGeneratedProfile ~= nil and self:isProfileSupported(currentGeneratedProfile) then
+                names[#names + 1] = currentGeneratedName
+            end
+        end
+    end
+
+    local order = self:getBuiltInProfileOrderMap()
+    table.sort(names, function(a, b)
+        local aGenerated = self:isSavegameGeneratedProfileName(a)
+        local bGenerated = self:isSavegameGeneratedProfileName(b)
+        if aGenerated ~= bGenerated then
+            return not aGenerated
+        end
+
+        local oa = order[a] or 10000
+        local ob = order[b] or 10000
+        if oa == ob then
+            return tostring(a) < tostring(b)
+        end
+        return oa < ob
+    end)
+
+    return names
+end
+
+function SaveUnitProfiles:getCurrencyLabel(value)
+    value = tonumber(value) or 1
+    local unit = self:getMoneyUnitDefinition(value)
+    if unit ~= nil then
+        return unit.symbol or unit.iconSymbol or unit.name or tostring(value)
+    end
+    return self:moneyName(value)
+end
+
+function SaveUnitProfiles:getProfileFriendlyName(profile)
+    if profile == nil then
+        return "Unknown"
+    end
+
+    return self:getProfileFriendlyNameByName(profile.name)
+end
+
+function SaveUnitProfiles:getProfilePreviewText(profile, profileNameOverride)
+    if profile == nil then
+        return "No profile selected."
+    end
+
+    local friendlyProfileName = self:getProfileFriendlyNameByName(profileNameOverride or profile.name)
+
+    local lines = {
+        string.format("Profile: %s", friendlyProfileName),
+        string.format("Currency: %s", self:getCurrencyLabel(profile.money)),
+        string.format("Speed / distance: %s", profile.miles and "miles / mph" or "kilometres / km/h"),
+        string.format("Temperature: %s", profile.fahrenheit and "Fahrenheit" or "Celsius"),
+        string.format("Field area: %s", profile.acre and "acres" or "hectares"),
+        string.format("Time format: %s", profile.use24HourTime and "24-hour" or "12-hour")
+    }
+
+    return table.concat(lines, "\n")
+end
+
+function SaveUnitProfiles:getProfileSelectorLabels(profileNames)
+    local labels = {}
+    for _, name in ipairs(profileNames or {}) do
+        local profile = self.config ~= nil and self.config.profiles ~= nil and self.config.profiles[name] or nil
+        labels[#labels + 1] = self:getProfileDisplayLabel(profile)
+    end
+    return labels
+end
+
+function SaveUnitProfiles:ensureProfileDialogLoaded()
+    -- 1.2.0.0 build15: custom XML dialog path disabled.
+    -- Builds 9 and 14 demonstrated that an incorrectly owned custom dialog can hard-hang FS25
+    -- when opened from the Settings buttonbar. Keep the stable selector path active until
+    -- the custom dialog can be rebuilt from a known-safe FS25 GUI pattern.
+    self.profileDialogLoaded = true
+    self:debugLog("Custom unit profile GUI disabled in this build; using safe selector fallback.")
+    return false
+end
+
+function SaveUnitProfiles:openUnitProfileSelectorDialog()
+    if self.config == nil then
+        self:loadConfig()
+    end
+
+    local slot = self:getCurrentSaveSlot()
+    if slot == nil then
+        self:showNotification("Could not open unit profiles: no savegame slot detected", true)
+        return false
+    end
+
+    local names = self:getSelectableProfileNames()
+    if #names == 0 then
+        self:showNotification("No supported unit profiles are available", true)
+        return false
+    end
+
+    local selectedIndex = 1
+    local currentName = self.config ~= nil and self.config.savegames ~= nil and self.config.savegames[slot] or nil
+    if currentName ~= nil then
+        for i, name in ipairs(names) do
+            if name == currentName then
+                selectedIndex = i
+                break
+            end
+        end
+    end
+
+    if self:ensureProfileDialogLoaded() and SUProfileDialog ~= nil and SUProfileDialog.INSTANCE ~= nil then
+        SUProfileDialog.INSTANCE:show(self, names, selectedIndex, slot)
+        return true
+    end
+
+    self:openUnitProfileSelectorFallback(names, selectedIndex)
+    return true
+end
+
+function SaveUnitProfiles:openUnitProfileSelectorFallback(profileNames, selectedIndex)
+    selectedIndex = tonumber(selectedIndex or 1) or 1
+    if selectedIndex < 1 then selectedIndex = 1 end
+    if selectedIndex > #profileNames then selectedIndex = #profileNames end
+
+    local name = profileNames[selectedIndex]
+    local profile = self.config.profiles[name]
+    local slot = self:getCurrentSaveSlot()
+    local text = string.format("savegame%d\n\n%s", tonumber(slot or 0), self:getProfilePreviewText(profile))
+    local buttons = {
+        { label = "APPLY", action = "APPLY" },
+        { label = "CUSTOM", action = "CUSTOM" },
+        { label = "NEXT", action = "NEXT" },
+        { label = "CANCEL", action = "CANCEL" }
+    }
+
+    local ok = self:showMultiActionDialog("Unit Profile", text, buttons, function(index, button)
+        if button == nil or button.action == "CANCEL" then
+            return
+        elseif button.action == "APPLY" then
+            SaveUnitProfiles:applyNamedProfileToActiveSave(name, "profile-selector-fallback")
+        elseif button.action == "CUSTOM" then
+            SaveUnitProfiles:openCustomProfileNameDialog()
+        elseif button.action == "NEXT" then
+            local nextIndex = selectedIndex + 1
+            if nextIndex > #profileNames then nextIndex = 1 end
+            SaveUnitProfiles:openUnitProfileSelectorFallback(profileNames, nextIndex)
+        end
+    end)
+
+    if not ok then
+        self:showNotification("Profile selector unavailable", true)
+    end
+end
+
+function SaveUnitProfiles:parseDialogSelection(options, ...)
+    local args = {...}
+    local clickedOk = true
+    local selectedIndex = nil
+    local selectedText = nil
+
+    for _, value in ipairs(args) do
+        if type(value) == "boolean" then
+            clickedOk = value
+        elseif type(value) == "number" and selectedIndex == nil then
+            selectedIndex = value
+        elseif type(value) == "string" and selectedText == nil then
+            selectedText = value
+        end
+    end
+
+    if clickedOk == false then
+        return nil, false
+    end
+
+    if selectedIndex ~= nil then
+        selectedIndex = tonumber(selectedIndex)
+        if selectedIndex == 0 and options[1] ~= nil then
+            selectedIndex = 1
+        end
+        if selectedIndex ~= nil and options[selectedIndex] ~= nil then
+            return selectedIndex, true
+        end
+        if selectedIndex ~= nil and options[selectedIndex + 1] ~= nil then
+            return selectedIndex + 1, true
+        end
+    end
+
+    if selectedText ~= nil then
+        for i, label in ipairs(options) do
+            if tostring(label) == tostring(selectedText) then
+                return i, true
+            end
+        end
+    end
+
+    return 1, true
+end
+
+function SaveUnitProfiles:describeDialogArgs(...)
+    local parts = {}
+    local args = {...}
+    for i, value in ipairs(args) do
+        parts[#parts + 1] = string.format("%d:%s=%s", i, type(value), tostring(value))
+    end
+    return table.concat(parts, ", ")
+end
+
+function SaveUnitProfiles:parseMultiActionDialogResult(buttons, ...)
+    local args = {...}
+    local selectedIndex = nil
+    local sawCancel = false
+
+    for _, value in ipairs(args) do
+        local valueType = type(value)
+        if valueType == "number" then
+            local numberValue = tonumber(value)
+            if numberValue ~= nil then
+                if buttons[numberValue] ~= nil then
+                    selectedIndex = numberValue
+                elseif buttons[numberValue + 1] ~= nil then
+                    selectedIndex = numberValue + 1
+                end
+            end
+        elseif valueType == "string" then
+            local textValue = tostring(value)
+            local textLower = string.lower(textValue)
+            for i, button in ipairs(buttons) do
+                if tostring(button.label) == textValue or tostring(button.action) == textValue then
+                    selectedIndex = i
+                    break
+                end
+            end
+
+            if textLower == "cancel" or textLower == "back" or textLower == "no" or textLower == "menu_cancel" or textLower == "menu_back" then
+                sawCancel = true
+            end
+        elseif valueType == "boolean" then
+            if value == false then
+                sawCancel = true
+            end
+        end
+    end
+
+    if selectedIndex ~= nil then
+        return selectedIndex, true
+    end
+
+    if sawCancel then
+        return nil, false
+    end
+
+    return nil, true
+end
+
+function SaveUnitProfiles:showMultiActionDialog(title, text, buttons, callback)
+    if type(buttons) ~= "table" or #buttons == 0 then
+        return false
+    end
+
+    -- Some FS25 builds/mod contexts do not expose g_gui:showMultiOptionDialog().
+    -- Use the basegame MultiOptionDialog singleton directly, which is the actual dialog class.
+    local dialog = nil
+    if MultiOptionDialog ~= nil and MultiOptionDialog.INSTANCE ~= nil then
+        dialog = MultiOptionDialog.INSTANCE
+    end
+
+    if dialog == nil then
+        self:log("MultiOptionDialog.INSTANCE unavailable.")
+        return false
+    end
+
+    if g_gui == nil or g_gui.showDialog == nil then
+        self:log("g_gui:showDialog unavailable for MultiOptionDialog.")
+        return false
+    end
+
+    if dialog.setText == nil or dialog.setButtonTexts == nil or dialog.setCallback == nil then
+        self:log("MultiOptionDialog methods unavailable: setText=" .. tostring(dialog.setText ~= nil) .. ", setButtonTexts=" .. tostring(dialog.setButtonTexts ~= nil) .. ", setCallback=" .. tostring(dialog.setCallback ~= nil))
+        return false
+    end
+
+    local b1 = buttons[1] ~= nil and buttons[1].label or nil
+    local b2 = buttons[2] ~= nil and buttons[2].label or nil
+    local b3 = buttons[3] ~= nil and buttons[3].label or nil
+    local b4 = buttons[4] ~= nil and buttons[4].label or nil
+
+    self.suPendingDialogButtons = buttons
+    self.suPendingDialogCallback = callback
+
+    dialog:setCallback(function(...)
+        local pendingButtons = SaveUnitProfiles.suPendingDialogButtons or buttons
+        local selectedIndex, accepted = SaveUnitProfiles:parseMultiActionDialogResult(pendingButtons, ...)
+        SaveUnitProfiles:debugLog("MultiOptionDialog callback args: " .. SaveUnitProfiles:describeDialogArgs(...))
+
+        if selectedIndex == nil and accepted then
+            SaveUnitProfiles:log("MultiOptionDialog returned no usable selection; args=" .. SaveUnitProfiles:describeDialogArgs(...))
+            SaveUnitProfiles:showNotification("Could not read profile dialog selection", true)
+            return
+        end
+
+        if not accepted then
+            SaveUnitProfiles:debugLog("Unit profile dialog cancelled.")
+            return
+        end
+
+        if SaveUnitProfiles.suPendingDialogCallback ~= nil then
+            SaveUnitProfiles.suPendingDialogCallback(selectedIndex, pendingButtons[selectedIndex])
+        end
+    end)
+
+    if dialog.setDialogType ~= nil and DialogElement ~= nil and DialogElement.TYPE_INFO ~= nil then
+        dialog:setDialogType(DialogElement.TYPE_INFO)
+    end
+
+    if dialog.setTitle ~= nil then
+        dialog:setTitle(tostring(title or "Unit Profile"))
+    end
+
+    if dialog.setButtonTexts ~= nil then
+        dialog:setButtonTexts(b1, b2, b3, b4)
+    end
+
+    if dialog.setButtonActions ~= nil then
+        dialog:setButtonActions(InputAction.MENU_ACTIVATE, InputAction.MENU_ACCEPT, InputAction.MENU_BACK, InputAction.MENU_CANCEL)
+    end
+
+    if dialog.setText ~= nil then
+        dialog:setText(tostring(text or ""))
+    end
+
+    if dialog.setDisableOpenSound ~= nil then
+        dialog:setDisableOpenSound(false)
+    end
+
+    g_gui:showDialog("MultiOptionDialog")
+    return true
+end
+
+function SaveUnitProfiles:openUnitProfileDialog()
+    if self.config == nil then
+        self:loadConfig()
+    end
+
+    local slot = self:getCurrentSaveSlot()
+    if slot == nil then
+        self:showNotification("Could not open unit profiles: no savegame slot detected", true)
+        return
+    end
+
+    local text = string.format("Choose a preset unit profile for savegame%d, or open More for Canada and custom options.", tonumber(slot))
+    local buttons = {
+        { label = "UK", action = "UK" },
+        { label = "US", action = "US" },
+        { label = "EU", action = "EU" },
+        { label = "MORE", action = "MORE" }
+    }
+
+    local ok = self:showMultiActionDialog("Unit Profile", text, buttons, function(index, button)
+        if button == nil then
+            return
+        end
+        if button.action == "MORE" then
+            SaveUnitProfiles:openUnitProfileMoreDialog()
+        else
+            SaveUnitProfiles:applyNamedProfileToActiveSave(button.action, "profile-dialog")
+        end
+    end)
+
+    if not ok then
+        self:log("MultiOptionDialog unavailable; saving current units with default savegame profile name.")
+        self:showNotification("Profile dialog unavailable; saved current units instead", true)
+        self:saveCurrentUnitsForActiveSave("dialog-fallback")
+    end
+end
+
+function SaveUnitProfiles:openUnitProfileMoreDialog()
+    local slot = self:getCurrentSaveSlot()
+    if slot == nil then
+        self:showNotification("Could not open unit profiles: no savegame slot detected", true)
+        return
+    end
+
+    local text = string.format("Additional unit profile options for savegame%d.", tonumber(slot))
+    local buttons = {
+        { label = "CA", action = "CA" },
+        { label = "CUSTOM", action = "CUSTOM" },
+        { label = "CURRENT", action = "CURRENT" },
+        { label = "BACK", action = "BACK" }
+    }
+
+    local ok = self:showMultiActionDialog("Unit Profile", text, buttons, function(index, button)
+        if button == nil then
+            return
+        end
+        if button.action == "CA" then
+            SaveUnitProfiles:applyNamedProfileToActiveSave("CA", "profile-dialog")
+        elseif button.action == "CUSTOM" then
+            SaveUnitProfiles:openCustomProfileNameDialog()
+        elseif button.action == "CURRENT" then
+            SaveUnitProfiles:saveCurrentUnitsForActiveSave("profile-dialog-current")
+        elseif button.action == "BACK" then
+            SaveUnitProfiles:openUnitProfileDialog()
+        end
+    end)
+
+    if not ok then
+        self:saveCurrentUnitsForActiveSave("dialog-fallback")
+    end
+end
+
+
+-- 1.2.0.0 build25: Unit Profile selection is injected directly into the native
+-- Settings UI. The old dialog entry point now just nudges the player to the
+-- settings row rather than opening a separate dialog.
+function SaveUnitProfiles:openUnitProfileDialog()
+    self:injectSettingsRows()
+    self:refreshSettingsRows()
+    self:showNotification("Use the Unit Profile row in Settings to choose and apply a profile", false)
+end
+
+function SaveUnitProfiles:onUnitProfileDialogClosed(profileNames, options, ...)
+    -- Kept for compatibility with earlier 1.2.0.0 test builds.
+    local selectedIndex, clickedOk = self:parseDialogSelection(options, ...)
+    if not clickedOk or selectedIndex == nil then
+        self:debugLog("Unit profile dialog cancelled.")
+        return
+    end
+
+    if selectedIndex > #profileNames then
+        self:openCustomProfileNameDialog()
+        return
+    end
+
+    local profileName = profileNames[selectedIndex]
+    self:applyNamedProfileToActiveSave(profileName, "profile-dialog")
+end
+
+function SaveUnitProfiles:parseTextDialogValue(defaultValue, ...)
+    local args = {...}
+    local clickedOk = true
+    local textValue = nil
+
+    for _, value in ipairs(args) do
+        if type(value) == "boolean" then
+            clickedOk = value
+        elseif type(value) == "string" and textValue == nil then
+            textValue = value
+        end
+    end
+
+    if clickedOk == false then
+        return nil, false
+    end
+
+    textValue = suTrim(textValue)
+    if textValue == nil or textValue == "" then
+        textValue = defaultValue
+    end
+
+    return textValue, true
+end
+
+function SaveUnitProfiles:openCustomProfileNameDialog()
+    local slot = self:getCurrentSaveSlot()
+    if slot == nil then
+        self:showNotification("Could not save custom profile: no savegame slot detected", true)
+        return
+    end
+
+    -- Custom profiles are intentionally deterministic and savegame-specific.
+    -- Do not ask the player for a global custom name; use SAVEGAME_## so the
+    -- profile belongs unambiguously to the active save slot.
+    local defaultName = string.format("SAVEGAME_%d", tonumber(slot))
+    self:saveCurrentUnitsForActiveSave("save-current-units-row", defaultName)
+end
+
+function SaveUnitProfiles:onCustomProfileNameDialogClosed(defaultName, ...)
+    local profileName, clickedOk = self:parseTextDialogValue(defaultName, ...)
+    if not clickedOk or profileName == nil or profileName == "" then
+        self:debugLog("Custom unit profile name dialog cancelled.")
+        return
+    end
+
+    self:saveCurrentUnitsForActiveSave("custom-profile-dialog", profileName)
+end
 
 function SaveUnitProfiles:uiDescribeButtonInfo(buttonInfo)
     if type(buttonInfo) ~= "table" then
@@ -498,6 +1553,335 @@ function SaveUnitProfiles:uiContainsGeneralHint(value, depth, visited)
     return false, nil
 end
 
+
+function SaveUnitProfiles:getProfileSelectorSimpleLabels(profileNames)
+    local labels = {}
+    for _, name in ipairs(profileNames or {}) do
+        -- Built-in profiles use their compact two-character operational code.
+        -- Savegame-specific custom profiles use their deterministic generated name,
+        -- e.g. SAVEGAME_17, so the player can see that the profile belongs to this save.
+        labels[#labels + 1] = tostring(name)
+    end
+    return labels
+end
+
+function SaveUnitProfiles:getCurrentMappedProfileIndex(profileNames)
+    local slot = self:getCurrentSaveSlot()
+    local currentName = nil
+    if slot ~= nil and self.config ~= nil and self.config.savegames ~= nil then
+        currentName = self.config.savegames[slot]
+    end
+    if currentName == nil then
+        currentName = self.activeProfileName
+    end
+    for i, name in ipairs(profileNames or {}) do
+        if name == currentName then
+            return i
+        end
+    end
+    return 1
+end
+
+function SaveUnitProfiles:findSettingsTemplateElements(scrollPanel)
+    local sectionHeader, multiOptionElement, buttonElement = nil, nil, nil
+    if scrollPanel == nil or type(scrollPanel.elements) ~= "table" then
+        return nil, nil, nil
+    end
+    for _, element in pairs(scrollPanel.elements) do
+        if element ~= nil then
+            if element.name == "sectionHeader" and sectionHeader == nil and element.clone ~= nil then
+                sectionHeader = element
+            end
+            if element.typeName == "Bitmap" and type(element.elements) == "table" then
+                local child = element.elements[1]
+                if child ~= nil then
+                    if child.typeName == "MultiTextOption" and multiOptionElement == nil and element.clone ~= nil then
+                        multiOptionElement = element
+                    elseif child.typeName == "Button" and buttonElement == nil and element.clone ~= nil then
+                        buttonElement = element
+                    end
+                end
+            end
+        end
+        if sectionHeader ~= nil and multiOptionElement ~= nil and buttonElement ~= nil then
+            break
+        end
+    end
+    return sectionHeader, multiOptionElement, buttonElement
+end
+
+function SaveUnitProfiles:setSettingsRowLabel(row, label)
+    if row == nil or type(row.elements) ~= "table" then
+        return
+    end
+    for _, element in pairs(row.elements) do
+        if element ~= nil and element.typeName == "Text" and element.setText ~= nil then
+            element:setText(tostring(label or ""))
+            element.id = nil
+            return
+        end
+    end
+end
+
+function SaveUnitProfiles:findChildByType(row, typeName)
+    if row == nil or type(row.elements) ~= "table" then
+        return nil
+    end
+    for _, element in pairs(row.elements) do
+        if element ~= nil and element.typeName == typeName then
+            return element
+        end
+    end
+    return nil
+end
+
+function SaveUnitProfiles:insertClonedSettingsRowBefore(row, parent, beforeElement)
+    if row == nil or parent == nil or type(parent.elements) ~= "table" then
+        return false
+    end
+
+    if row.parent ~= nil and row.parent.removeElement ~= nil then
+        pcall(function() row.parent:removeElement(row) end)
+    end
+
+    local insertIndex = nil
+    for i, element in ipairs(parent.elements) do
+        if element == beforeElement then
+            insertIndex = i
+            break
+        end
+    end
+
+    if insertIndex == nil then
+        table.insert(parent.elements, row)
+    else
+        table.insert(parent.elements, insertIndex, row)
+    end
+    row.parent = parent
+    return true
+end
+
+function SaveUnitProfiles:getNativeMoneyUnitElement(settingsPage)
+    if settingsPage ~= nil then
+        return settingsPage.multiMoneyUnit or settingsPage.moneyElement
+    end
+    if g_inGameMenu ~= nil then
+        return g_inGameMenu.multiMoneyUnit or g_inGameMenu.moneyElement
+    end
+    return nil
+end
+
+function SaveUnitProfiles:updateProfileSelectorTooltip(profileName)
+    if self.settingsProfileSelector == nil then
+        return false
+    end
+    local profile = nil
+    if self.config ~= nil and self.config.profiles ~= nil then
+        profile = self.config.profiles[profileName]
+    end
+
+    local text = self:getProfilePreviewText(profile, profileName)
+
+    -- FS25 settings controls use their first child text element as the right-hand
+    -- help/tooltip pane source. Also keep common tooltip fields updated in case
+    -- the focused control refreshes from them rather than the child text element.
+    local updated = false
+    self.settingsProfileSelector.toolTipText = text
+    self.settingsProfileSelector.tooltipText = text
+    self.settingsProfileSelector.helpText = text
+
+    if self.settingsProfileSelector.elements ~= nil and self.settingsProfileSelector.elements[1] ~= nil and self.settingsProfileSelector.elements[1].setText ~= nil then
+        self.settingsProfileSelector.elements[1]:setText(text)
+        updated = true
+    end
+    return updated
+end
+
+function SaveUnitProfiles:injectSettingsRows()
+    if self.settingsRowsInjected == true then
+        return true
+    end
+
+    if self.config == nil then
+        self:loadConfig()
+    end
+
+    local settingsPage = self:getPageSettings()
+    if settingsPage == nil then
+        return false
+    end
+
+    -- Build28: inject directly into General Settings > Units by cloning the native
+    -- Money Unit row. This keeps SaveUnitProfiles standalone and native-looking.
+    local moneyElement = self:getNativeMoneyUnitElement(settingsPage)
+    local moneyRow = moneyElement ~= nil and moneyElement.parent or nil
+    local unitsParent = moneyRow ~= nil and moneyRow.parent or nil
+
+    if moneyElement == nil or moneyRow == nil or unitsParent == nil then
+        self:log("Unit Profile settings row injection skipped: native Money Unit row not found")
+        return false
+    end
+
+    local profileRow = moneyRow:clone(settingsPage)
+    if profileRow == nil then
+        self:log("Unit Profile settings row injection skipped: could not clone Money Unit row")
+        return false
+    end
+
+    profileRow.id = "sup_unitProfileRow"
+    self:setSettingsRowLabel(profileRow, "Unit Profile")
+
+    local profileSelector = self:findChildByType(profileRow, "MultiTextOption")
+    if profileSelector == nil then
+        profileSelector = self:findChildByType(profileRow, "CheckedOptionElement")
+    end
+    if profileSelector == nil then
+        self:log("Unit Profile settings row injection skipped: profile selector control not found")
+        return false
+    end
+
+    profileSelector.id = "sup_unitProfileSelector"
+    profileSelector.focusId = nil
+    profileSelector.onClickCallback = function(_, state, button)
+        SaveUnitProfiles:onSettingsProfileSelectorChanged(state, button)
+    end
+
+    self:insertClonedSettingsRowBefore(profileRow, unitsParent, moneyRow)
+
+    self.settingsProfileRow = profileRow
+    self.settingsProfileSelector = profileSelector
+
+    -- Optional native button row for custom profiles. Use a known button template from
+    -- Game Settings if available, but keep the selector itself independent of this.
+    local buttonTemplate = nil
+    local gameLayout = settingsPage.gameSettingsLayout
+    if gameLayout ~= nil then
+        local _, _, foundButtonTemplate = self:findSettingsTemplateElements(gameLayout)
+        buttonTemplate = foundButtonTemplate
+    end
+
+    if buttonTemplate ~= nil then
+        local customRow = buttonTemplate:clone(settingsPage)
+        if customRow ~= nil then
+            customRow.id = "sup_saveCustomProfileRow"
+            self:setSettingsRowLabel(customRow, "Save Current Units")
+            local button = self:findChildByType(customRow, "Button")
+            if button ~= nil then
+                button.id = "sup_saveCustomProfileButton"
+                if button.setText ~= nil then button:setText("SAVE CUSTOM") end
+                if button.applyProfile ~= nil then button:applyProfile("settingsButton") end
+                button.onClickCallback = function()
+                    SaveUnitProfiles:openCustomProfileNameDialog()
+                end
+                if button.elements ~= nil and button.elements[1] ~= nil and button.elements[1].setText ~= nil then
+                    button.elements[1]:setText("Save the current currency and unit settings as a custom profile for this savegame.")
+                end
+                self.settingsCustomButton = button
+            end
+            self:insertClonedSettingsRowBefore(customRow, unitsParent, moneyRow)
+            self.settingsCustomRow = customRow
+        end
+    else
+        self:debugLog("Unit Profile custom save row skipped: no native button template found")
+    end
+
+    self.settingsRowsInjected = true
+    self:refreshSettingsRows()
+
+    if unitsParent.invalidateLayout ~= nil then
+        pcall(function() unitsParent:invalidateLayout() end)
+    end
+    if unitsParent.updateAbsolutePosition ~= nil then
+        pcall(function() unitsParent:updateAbsolutePosition() end)
+    end
+    if unitsParent.invalidateChildren ~= nil then
+        pcall(function() unitsParent:invalidateChildren() end)
+    end
+
+    local currentGui = FocusManager ~= nil and FocusManager.currentGui or nil
+    if FocusManager ~= nil then
+        pcall(function()
+            FocusManager:setGui("ingameMenuSettings")
+            FocusManager:loadElementFromCustomValues(profileSelector)
+            if self.settingsCustomButton ~= nil then
+                FocusManager:loadElementFromCustomValues(self.settingsCustomButton)
+            end
+            if currentGui ~= nil then
+                FocusManager:setGui(currentGui)
+            end
+        end)
+    end
+
+    self:log("Unit Profile selector injected into General Settings > Units.")
+    return true
+end
+
+function SaveUnitProfiles:refreshSettingsRows()
+    if self.settingsProfileSelector == nil then
+        return false
+    end
+    if self.config == nil then
+        self:loadConfig()
+    end
+
+    local names = self:getSelectableProfileNames()
+    if #names == 0 then
+        names = {"US"}
+    end
+    local labels = self:getProfileSelectorSimpleLabels(names)
+    local index = self:getCurrentMappedProfileIndex(names)
+
+    self.settingsProfileNames = names
+    self.settingsSelectedProfileIndex = index
+
+    if self.settingsProfileSelector.setTexts ~= nil then
+        self.settingsProfileSelector:setTexts(labels)
+    end
+    if self.settingsProfileSelector.setState ~= nil then
+        pcall(function() self.settingsProfileSelector:setState(index, false) end)
+    end
+
+    self:updateProfileSelectorTooltip(names[index])
+    return true
+end
+
+function SaveUnitProfiles:onSettingsProfileSelectorChanged(state, button)
+    local newState = tonumber(state)
+    if newState == nil and type(button) == "number" then
+        newState = tonumber(button)
+    end
+    if newState == nil and button ~= nil and type(button.state) == "number" then
+        newState = tonumber(button.state)
+    end
+    if newState == nil then
+        newState = self.settingsSelectedProfileIndex or 1
+    end
+
+    local names = self.settingsProfileNames or self:getSelectableProfileNames()
+    if newState < 1 then newState = 1 end
+    if newState > #names then newState = #names end
+    self.settingsSelectedProfileIndex = newState
+
+    local name = names[newState]
+    self:updateProfileSelectorTooltip(name)
+
+    if name == nil then
+        self:showNotification("No unit profile selected", true)
+        return false
+    end
+
+    -- Selecting a profile is the apply action. No separate APPLY row is needed.
+    local ok = self:applyNamedProfileToActiveSave(name, "settings-units-profile-selector")
+    self:refreshSettingsRows()
+    return ok
+end
+
+function SaveUnitProfiles:applySettingsSelectedProfile()
+    -- Kept as a console/internal compatibility wrapper. The native Units selector
+    -- now applies immediately when the profile is selected.
+    return self:onSettingsProfileSelectorChanged(self.settingsSelectedProfileIndex or 1)
+end
+
 function SaveUnitProfiles:shouldAddSaveUnitsButton(frame, className)
     -- SettingsGeneralFrame is the actual General Settings subframe when it is directly queried.
     if tostring(className) == "SettingsGeneralFrame" then
@@ -554,23 +1938,9 @@ function SaveUnitProfiles:debugFrameContext(className, frame, buttonInfo)
 end
 
 function SaveUnitProfiles:getSaveUnitsButtonInfo()
-    local action = nil
-    if InputAction ~= nil then
-        action = InputAction.MENU_EXTRA_1 or InputAction.MENU_EXTRA_2 or InputAction.MENU_ACTIVATE
-    end
-
-    if action == nil then
-        return nil
-    end
-
-    return {
-        inputAction = action,
-        text = "SAVE UNITS",
-        callback = function()
-            SaveUnitProfiles:saveCurrentUnitsForActiveSave("general-settings-button")
-        end,
-        suSaveUnitProfilesButton = true
-    }
+    -- Build25 injects native settings rows instead of adding a bottom buttonbar action.
+    -- Keep this function for compatibility with older hook code, but do not add a button.
+    return nil
 end
 
 function SaveUnitProfiles:appendSaveUnitsButtonInfo(buttonInfo)
@@ -596,6 +1966,10 @@ function SaveUnitProfiles:tryInjectSettingsFrameButton(frame)
     if frame == nil then
         return
     end
+
+    -- Build25: rows are injected into the native Settings layout.
+    self:injectSettingsRows()
+    self:refreshSettingsRows()
 
     if type(frame.menuButtonInfo) == "table" then
         self:appendSaveUnitsButtonInfo(frame.menuButtonInfo)
@@ -645,6 +2019,15 @@ function SaveUnitProfiles:patchSettingsFrameClass(classRef, className)
     return patched
 end
 
+function SaveUnitProfiles:onSettingsFrameOpenForRows(frame)
+    self.settingsRowsInjected = self.settingsRowsInjected or false
+    if self.settingsRowsInjected ~= true then
+        self:injectSettingsRows()
+    else
+        self:refreshSettingsRows()
+    end
+end
+
 function SaveUnitProfiles:installUiHooks()
     if self.uiHooksInstalled then
         return
@@ -665,6 +2048,145 @@ function SaveUnitProfiles:installUiHooks()
     end
 
     self.uiHooksInstalled = true
+end
+
+function SaveUnitProfiles:getPageSettings()
+    if g_inGameMenu ~= nil and g_inGameMenu.pageSettings ~= nil then
+        return g_inGameMenu.pageSettings
+    end
+
+    if g_gui ~= nil and g_gui.currentGui ~= nil then
+        local gui = g_gui.currentGui
+        if gui.target ~= nil and gui.target.pageSettings ~= nil then
+            return gui.target.pageSettings
+        end
+    end
+
+    return nil
+end
+
+function SaveUnitProfiles:setCheckedElement(element, checked, label)
+    if element == nil then
+        return false, tostring(label or "element") .. "=nil"
+    end
+
+    local ok = false
+    local detail = {}
+
+    if element.setIsChecked ~= nil then
+        local callOk, err = pcall(function()
+            element:setIsChecked(checked == true, true)
+        end)
+        detail[#detail + 1] = "setIsChecked=" .. tostring(callOk and "ok" or ("error:" .. tostring(err)))
+        ok = ok or callOk
+    end
+
+    if element.setState ~= nil and CheckedOptionElement ~= nil then
+        local state = checked == true and CheckedOptionElement.STATE_CHECKED or CheckedOptionElement.STATE_UNCHECKED
+        if state ~= nil then
+            local callOk, err = pcall(function()
+                element:setState(state, true)
+            end)
+            detail[#detail + 1] = "setState=" .. tostring(callOk and tostring(state) or ("error:" .. tostring(err)))
+            ok = ok or callOk
+        end
+    end
+
+    return ok, tostring(label or "element") .. "[" .. table.concat(detail, ",") .. "]"
+end
+
+function SaveUnitProfiles:setMoneyUiElement(element, money)
+    if element == nil then
+        return false, "moneyElement=nil"
+    end
+
+    if element.setState ~= nil then
+        local ok, err = pcall(function()
+            element:setState(tonumber(money) or 1, true)
+        end)
+        return ok, "moneyElement.setState=" .. tostring(ok and tostring(money) or ("error:" .. tostring(err)))
+    end
+
+    return false, "moneyElement.setState=unavailable"
+end
+
+function SaveUnitProfiles:refreshRuntimeAndSettingsUi(profile, profileName, reason)
+    if profile == nil then
+        return "runtimeRefresh=skipped:nil-profile"
+    end
+
+    local details = {}
+    local money = tonumber(profile.money) or 1
+
+    self.currentRuntimeMoneyUnit = money
+    self:extendMoneyUnitSelectorTexts()
+
+    if g_i18n ~= nil then
+        if g_i18n.setMoneyUnit ~= nil then
+            local ok, err = pcall(function()
+                g_i18n:setMoneyUnit(money)
+            end)
+            details[#details + 1] = "g_i18n.setMoneyUnit=" .. tostring(ok and "ok" or ("error:" .. tostring(err)))
+        end
+
+        local mt = getmetatable(g_i18n)
+        if mt ~= nil and mt.__index ~= nil and mt.__index.setMoneyUnit ~= nil then
+            local ok, err = pcall(function()
+                mt.__index.setMoneyUnit(g_i18n, money)
+            end)
+            details[#details + 1] = "g_i18n.__index.setMoneyUnit=" .. tostring(ok and "ok" or ("error:" .. tostring(err)))
+        end
+    end
+
+    if g_currentMission ~= nil and g_currentMission.setMoneyUnit ~= nil then
+        local ok, err = pcall(function()
+            g_currentMission:setMoneyUnit(money)
+        end)
+        details[#details + 1] = "g_currentMission.setMoneyUnit=" .. tostring(ok and "ok" or ("error:" .. tostring(err)))
+    end
+
+    if g_inGameMenu ~= nil then
+        if g_inGameMenu.multiMoneyUnit ~= nil then
+            local ok, detail = self:setMoneyUiElement(g_inGameMenu.multiMoneyUnit, money)
+            details[#details + 1] = "g_inGameMenu." .. detail
+        end
+    end
+
+    local pageSettings = self:getPageSettings()
+    if pageSettings ~= nil then
+        if pageSettings.multiMoneyUnit ~= nil then
+            local ok, detail = self:setMoneyUiElement(pageSettings.multiMoneyUnit, money)
+            details[#details + 1] = "pageSettings." .. detail
+        end
+
+        local ok1, detail1 = self:setCheckedElement(pageSettings.checkUseMiles, profile.miles, "checkUseMiles")
+        local ok2, detail2 = self:setCheckedElement(pageSettings.checkUseFahrenheit, profile.fahrenheit, "checkUseFahrenheit")
+        local ok3, detail3 = self:setCheckedElement(pageSettings.checkUseAcre, profile.acre, "checkUseAcre")
+        details[#details + 1] = detail1
+        details[#details + 1] = detail2
+        details[#details + 1] = detail3
+
+        if pageSettings.checkTimeFormat ~= nil then
+            local ok4, detail4 = self:setCheckedElement(pageSettings.checkTimeFormat, profile.use24HourTime, "checkTimeFormat")
+            details[#details + 1] = detail4
+        end
+
+        if pageSettings.checkHourFormat ~= nil then
+            local ok5, detail5 = self:setCheckedElement(pageSettings.checkHourFormat, profile.use24HourTime, "checkHourFormat")
+            details[#details + 1] = detail5
+        end
+
+        if pageSettings.setMenuButtonInfoDirty ~= nil then
+            local ok, err = pcall(function()
+                pageSettings:setMenuButtonInfoDirty()
+            end)
+            details[#details + 1] = "pageSettings.setMenuButtonInfoDirty=" .. tostring(ok and "ok" or ("error:" .. tostring(err)))
+        end
+    else
+        details[#details + 1] = "pageSettings=nil"
+    end
+
+    return table.concat(details, ";")
 end
 
 function SaveUnitProfiles:applyProfile(profile, profileName, reason)
@@ -689,6 +2211,23 @@ function SaveUnitProfiles:applyProfile(profile, profileName, reason)
     apply("useFahrenheit", profile.fahrenheit)
     apply("useAcre", profile.acre)
     apply("use24HourTime", profile.use24HourTime)
+
+    local runtimeDetail = self:refreshRuntimeAndSettingsUi(profile, profileName, reason)
+    results[#results + 1] = "runtime/UI [" .. tostring(runtimeDetail) .. "]"
+
+    -- The live game/UI refresh path is authoritative for visible currency and unit changes.
+    -- Some GameSettings keys do not return true from setValue even when the setting is valid,
+    -- so verify one more time after the runtime refresh before deciding whether to warn.
+    local verifiedAfterRuntime = true
+    verifiedAfterRuntime = verifiedAfterRuntime and self:settingsValueMatches(self:getGameSetting("moneyUnit"), tonumber(profile.money))
+    verifiedAfterRuntime = verifiedAfterRuntime and self:settingsValueMatches(self:getGameSetting("useMiles"), profile.miles)
+    verifiedAfterRuntime = verifiedAfterRuntime and self:settingsValueMatches(self:getGameSetting("useFahrenheit"), profile.fahrenheit)
+    verifiedAfterRuntime = verifiedAfterRuntime and self:settingsValueMatches(self:getGameSetting("useAcre"), profile.acre)
+    verifiedAfterRuntime = verifiedAfterRuntime and self:settingsValueMatches(self:getGameSetting("use24HourTime"), profile.use24HourTime)
+
+    if verifiedAfterRuntime then
+        allOk = true
+    end
 
     self.activeProfileName = profileName or profile.name
     self.lastApplyOk = allOk
@@ -735,22 +2274,52 @@ end
 function SaveUnitProfiles:loadMap(name)
     self:log(string.format("Loaded v%s (%s)", self.VERSION, self.BUILD_TAG))
     self:loadConfig()
+    self:installIntegratedCurrencySupport()
     self.activeSlot = self:getCurrentSaveSlot()
     self.elapsedMs = 0
     self.hasApplied = false
     self:registerConsoleCommands()
+    self.settingsRowsInjected = false
+    self.settingsProfileSelector = nil
     self:installUiHooks()
 end
 
 function SaveUnitProfiles:update(dt)
-    if self.hasApplied then
-        return
+    if self.settingsRowsInjected ~= true then
+        self:injectSettingsRows()
     end
 
-    self.elapsedMs = self.elapsedMs + dt
-    if self.elapsedMs >= self.applyDelayMs then
-        self.hasApplied = true
-        self:applyForCurrentSave("delayed-load")
+    if self.pendingApplyProfile ~= nil then
+        self.pendingApplyMs = (self.pendingApplyMs or 0) - dt
+        if self.pendingApplyMs <= 0 then
+            local profile = self.pendingApplyProfile
+            local profileName = self.pendingApplyProfileName
+            local reason = self.pendingApplyReason or "deferred-profile-dialog"
+            local passes = tonumber(self.pendingApplyPasses or 1) or 1
+
+            self:applyProfile(profile, profileName, reason)
+
+            passes = passes - 1
+            if passes > 0 then
+                self.pendingApplyPasses = passes
+                self.pendingApplyMs = 700
+                self:debugLog(string.format("Queued one more deferred apply pass for profile '%s'", tostring(profileName)))
+            else
+                self.pendingApplyProfile = nil
+                self.pendingApplyProfileName = nil
+                self.pendingApplyReason = nil
+                self.pendingApplyMs = nil
+                self.pendingApplyPasses = nil
+            end
+        end
+    end
+
+    if not self.hasApplied then
+        self.elapsedMs = self.elapsedMs + dt
+        if self.elapsedMs >= self.applyDelayMs then
+            self.hasApplied = true
+            self:applyForCurrentSave("delayed-load")
+        end
     end
 end
 
@@ -759,6 +2328,10 @@ function SaveUnitProfiles:deleteMap()
     self.config = nil
     self.activeSlot = nil
     self.activeProfileName = nil
+    self.settingsRowsInjected = false
+    self.settingsProfileSelector = nil
+    self.settingsProfileNames = nil
+    self.settingsSelectedProfileIndex = nil
 end
 
 
@@ -1159,8 +2732,9 @@ function SaveUnitProfiles:registerConsoleCommands()
     addConsoleCommand("suStatus", "SaveUnitProfiles: print active save/profile and current game settings", "consoleStatus", self)
     addConsoleCommand("suReload", "SaveUnitProfiles: reload XML config", "consoleReload", self)
     addConsoleCommand("suApply", "SaveUnitProfiles: apply mapped profile, or named profile: suApply UK", "consoleApply", self)
+    addConsoleCommand("suProfile", "SaveUnitProfiles: assign/apply profile to active savegame: suProfile UK", "consoleProfile", self)
     addConsoleCommand("suDebug", "SaveUnitProfiles: toggle debug logging: suDebug on|off", "consoleDebug", self)
-    addConsoleCommand("suSaveCurrent", "SaveUnitProfiles: save current game unit settings for this savegame", "consoleSaveCurrent", self)
+    addConsoleCommand("suSaveCurrent", "SaveUnitProfiles: save current game unit settings for this savegame, optionally named: suSaveCurrent MyProfile", "consoleSaveCurrent", self)
 
     self.consoleCommandsRegistered = true
 end
@@ -1173,12 +2747,13 @@ function SaveUnitProfiles:consoleStatus()
     self:log("  activeProfile: " .. tostring(self.activeProfileName))
     self:log("  lastApplyOk: " .. tostring(self.lastApplyOk))
 
-    if g_gameSettings ~= nil and g_gameSettings.getValue ~= nil then
-        self:log("  moneyUnit: " .. tostring(g_gameSettings:getValue("moneyUnit")) .. " (" .. self:moneyName(g_gameSettings:getValue("moneyUnit")) .. ")")
-        self:log("  useMiles: " .. suBoolToString(g_gameSettings:getValue("useMiles")))
-        self:log("  useFahrenheit: " .. suBoolToString(g_gameSettings:getValue("useFahrenheit")))
-        self:log("  useAcre: " .. suBoolToString(g_gameSettings:getValue("useAcre")))
-        self:log("  use24HourTime: " .. suBoolToString(g_gameSettings:getValue("use24HourTime")))
+    if g_gameSettings ~= nil then
+        local moneyUnit = self:getGameSetting("moneyUnit")
+        self:log("  moneyUnit: " .. tostring(moneyUnit) .. " (" .. self:moneyName(moneyUnit) .. ")")
+        self:log("  useMiles: " .. suBoolToString(self:getGameSetting("useMiles")))
+        self:log("  useFahrenheit: " .. suBoolToString(self:getGameSetting("useFahrenheit")))
+        self:log("  useAcre: " .. suBoolToString(self:getGameSetting("useAcre")))
+        self:log("  use24HourTime: " .. suBoolToString(self:getGameSetting("use24HourTime")))
     else
         self:log("  g_gameSettings unavailable")
     end
@@ -1209,8 +2784,17 @@ function SaveUnitProfiles:consoleApply(profileName)
     self:applyForCurrentSave("manual-console")
 end
 
-function SaveUnitProfiles:consoleSaveCurrent()
-    self:saveCurrentUnitsForActiveSave("manual-console")
+function SaveUnitProfiles:consoleProfile(profileName)
+    profileName = suTrim(profileName)
+    if profileName == nil or profileName == "" then
+        self:log("Usage: suProfile <profileName>")
+        return
+    end
+    self:applyNamedProfileToActiveSave(profileName, "manual-console-profile")
+end
+
+function SaveUnitProfiles:consoleSaveCurrent(profileName)
+    self:saveCurrentUnitsForActiveSave("manual-console", profileName)
 end
 
 function SaveUnitProfiles:consoleDebug(value)
