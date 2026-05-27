@@ -1,199 +1,322 @@
 # FS25_SaveUnitProfiles
 
-**Save Unit Profiles** is a Farming Simulator 25 utility script mod that applies currency and unit preferences per savegame.
+**Save Unit Profiles** is a Farming Simulator 25 script mod that allows different savegames to use different currency and unit settings.
 
-It is designed for players who switch between maps from different regions and want each savegame to remember its own regional settings, such as dollars or pounds, miles or kilometres, Fahrenheit or Celsius, and acres or hectares.
+Farming Simulator normally stores currency and measurement unit preferences globally. That means if you play a US map using dollars, miles, Fahrenheit and acres, then switch to a UK or European map, those settings can follow you into the next savegame.
 
-## New in 1.1.0.0: Save Units from the Settings Menu
+Save Unit Profiles fixes that by applying a unit profile for the active savegame.
 
-Version `1.1.0.0` adds a **SAVE UNITS** button to the in-game Settings interface.
+---
 
-This means you no longer need to manually edit the XML file for normal setup and you can have a custom setup not region specific.
-
-### Recommended setup workflow
-
-1. Load the savegame you want to configure.
-2. Open the in-game Settings menu.
-3. Set the unit options normally:
-   - Money unit
-   - Miles / kilometres
-   - Fahrenheit / Celsius
-   - Acres / hectares
-   - 12-hour / 24-hour time
-4. Click **SAVE UNITS**.
-5. The mod creates or updates a save-specific profile for the currently loaded savegame.
-
-For example, if the current save is `savegame8`, the mod can create a profile such as:
+## Current Version
 
 ```text
-SAVEGAME_8
+Version: 1.2.0.0
 ```
 
-and map that save slot to the saved unit settings automatically.
+---
 
-The XML configuration system is still supported for advanced users and manual editing.
+## What It Does
 
-<img width="3840" height="2160" alt="SaveUnitProfiles_General_Settings_Save_Button" src="https://github.com/user-attachments/assets/16ef1023-8710-4f2f-8eff-2696bf7e2336" />
-
-## Features
-
-- Applies unit and currency settings automatically when a configured savegame is loaded.
-- Adds a **SAVE UNITS** button to the in-game Settings interface.
-- Saves the current unit settings directly to the active savegame profile.
-- Supports configurable `US`, `UK`, and `EU` profiles by default.
-- Supports custom save-specific profiles such as `SAVEGAME_8`.
-- Uses a per-user configuration file in `modSettings/FS25_SaveUnitProfiles/saveUnitProfiles.xml`.
-- Shows an in-game notification when a profile is applied or saved.
-- Includes console commands for status, manual apply, reload, save-current, and debug logging.
-
-## Settings applied
-
-The mod applies the following FS25 game settings at runtime:
-
-- `moneyUnit` — `1 = Euro`, `2 = Dollar`, `3 = Pounds`
-- `useMiles`
-- `useFahrenheit`
-- `useAcre`
-- `use24HourTime`
-
-## Default regional profiles
-
-The included default profiles are:
-
-### US
-
-- Dollars
-- Miles
-- Fahrenheit
-- Acres
-- 12-hour time
-
-### UK
-
-- Pounds
-- Miles
-- Celsius
-- Acres
-- 24-hour time
-
-### EU
-
-- Euros
-- Kilometres
-- Celsius
-- Hectares
-- 24-hour time
-
-## Installation
-
-1. Place `FS25_SaveUnitProfiles.zip` in your Farming Simulator 25 mods folder:
+Save Unit Profiles adds a native **Unit Profile** selector directly into the FS25 settings menu:
 
 ```text
-Documents/My Games/FarmingSimulator2025/mods
+General Settings > Units
 ```
 
-2. Enable the mod for the relevant savegame.
-3. Load the savegame.
-4. Use the **SAVE UNITS** button in the in-game Settings interface to store the current unit settings for that savegame.
+From there, you can choose a regional unit profile such as:
 
-The mod will create its configuration file automatically if it does not already exist:
+```text
+US
+UK
+EU
+CA
+BR
+JP
+CH
+PL
+```
+
+Selecting a profile immediately applies the profile to the current savegame and stores that mapping in the mod configuration.
+
+The right-hand settings help pane shows what the selected profile means, including the country or region name and the unit choices used by that profile.
+
+Example:
+
+```text
+Profile: CA - Canada
+Currency: $
+Speed / distance: kilometres / km/h
+Temperature: Celsius
+Field area: acres
+Time format: 24-hour
+```
+
+---
+
+## Main Features
+
+- Native FS25 settings integration under **General Settings > Units**.
+- Per-savegame unit profile assignment.
+- Profile selection applies immediately when changed.
+- Built-in regional profiles using two-character profile codes.
+- Save-specific custom profile support using deterministic `SAVEGAME_##` profile names.
+- Right-hand tooltip/help text showing the selected profile’s country/region and unit setup.
+- Runtime refresh of the active game settings and visible Settings UI.
+- XML configuration stored in the player’s `modSettings` folder.
+- Console commands retained for troubleshooting and manual setup.
+- No dependency on Additional Currencies or any other currency mod.
+
+---
+
+## Built-in Profiles
+
+Save Unit Profiles includes predefined regional profiles for common map regions and modded map locations.
+
+The selector displays the operational two-character profile code. The right-hand tooltip displays the full country or region name.
+
+Typical examples include:
+
+| Code | Profile |
+|---|---|
+| US | United States |
+| UK | United Kingdom |
+| EU | European Union / Central Europe |
+| CA | Canada |
+| BR | Brazil |
+| CN | China |
+| CZ | Czech Republic |
+| HU | Hungary |
+| JP | Japan |
+| NO | Norway |
+| PL | Poland |
+| RO | Romania |
+| RU | Russia |
+| KR | South Korea |
+| CH | Switzerland |
+| TR | Turkey |
+| UA | Ukraine |
+
+The exact unit settings are shown in-game when each profile is selected.
+
+---
+
+## Custom Savegame Profiles
+
+Custom profiles are savegame-specific.
+
+Clicking **Save Current Units** creates or updates a profile for the current savegame slot using the format:
+
+```text
+SAVEGAME_##
+```
+
+For example:
+
+```text
+SAVEGAME_17
+```
+
+This allows you to manually adjust the normal FS25 unit settings, then save that exact setup as the custom profile for the current savegame.
+
+Custom profiles from other savegame slots are not shown in the selector for the active savegame.
+
+---
+
+## How to Use
+
+1. Enable the mod for the savegame.
+2. Load the savegame.
+3. Open:
+
+```text
+General Settings > Units
+```
+
+4. Use the **Unit Profile** selector.
+5. Select the desired regional profile.
+
+The selected profile is applied immediately and saved for the current savegame.
+
+To save a custom setup:
+
+1. Adjust the normal FS25 unit settings.
+2. Click **Save Current Units**.
+3. The mod saves those settings as the current savegame’s `SAVEGAME_##` custom profile.
+4. The Unit Profile selector updates to that save-specific profile.
+
+---
+
+## Configuration File
+
+The mod stores its configuration here:
 
 ```text
 Documents/My Games/FarmingSimulator2025/modSettings/FS25_SaveUnitProfiles/saveUnitProfiles.xml
 ```
 
-## Saving units for a savegame
+The XML file contains:
 
-The simplest way to configure a savegame is to use the in-game Settings interface.
+- profile definitions
+- savegame slot mappings
+- custom savegame profiles
 
-1. Load the savegame.
-2. Change the unit settings to the values you want.
-3. Click **SAVE UNITS**.
+Manual editing is still supported, but normal use should no longer require editing the XML file directly.
 
-The mod will:
+Example savegame mapping:
 
-- read the currently selected unit settings from the game,
-- create or update a save-specific profile,
-- map the current save slot to that profile,
-- save the changes to `saveUnitProfiles.xml`,
-- and show an on-screen confirmation.
+```xml
+<savegame slot="17" profile="CA" />
+```
 
-If the button is unavailable due to a game update or another UI mod, use the console fallback command:
+Example custom savegame profile:
+
+```xml
+<profile name="SAVEGAME_17">
+    <money>3</money>
+    <miles>true</miles>
+    <fahrenheit>false</fahrenheit>
+    <acre>true</acre>
+    <use24HourTime>true</use24HourTime>
+</profile>
+```
+
+---
+
+## Base Currency Notes
+
+Farming Simulator 25’s base game includes the standard money units:
+
+```text
+1 = Euro
+2 = Dollar
+3 = Pound
+```
+
+Save Unit Profiles includes integrated regional currency/profile definitions directly in the mod. It does not require Additional Currencies.
+
+Currency changes affect the displayed currency/unit preference. The mod does not change your actual farm balance, prices, economy balancing, loan values, or savegame finances.
+
+---
+
+## Console Commands
+
+Console commands remain available for testing and troubleshooting.
+
+```text
+suStatus
+suReload
+suApply
+suApply UK
+suApply US
+suApply EU
+suProfile UK
+suProfile CA
+suSaveCurrent
+suDebug on
+suDebug off
+```
+
+Common examples:
+
+```text
+suStatus
+```
+
+Shows the current Save Unit Profiles status.
+
+```text
+suReload
+```
+
+Reloads the XML configuration.
+
+```text
+suProfile CA
+```
+
+Assigns and applies the Canada profile to the current savegame.
 
 ```text
 suSaveCurrent
 ```
 
-This performs the same save-specific profile update.
+Saves the current in-game unit settings as the current savegame’s custom `SAVEGAME_##` profile.
 
-## Manual XML configuration
+---
 
-Advanced users can still edit the configuration file directly:
+## Changelog
+
+### 1.2.0.0
+
+#### Added
+
+- Added a native **Unit Profile** selector to **General Settings > Units**.
+- Added immediate apply-on-selection behaviour for unit profiles.
+- Added integrated regional profile/currency support directly in Save Unit Profiles.
+- Added predefined profiles for multiple countries and map regions.
+- Added right-hand tooltip/help text showing profile country/region and unit details.
+- Added save-specific custom profile support using `SAVEGAME_##`.
+
+#### Changed
+
+- Replaced the previous separate UNIT PROFILE button/dialog workflow with a native settings-row selector.
+- Profile selection now applies immediately and stores the mapping for the active savegame.
+- **Save Current Units** now updates the active savegame’s deterministic custom profile.
+- Custom profiles are scoped to the current savegame slot.
+- The selector shows two-character profile codes for predefined profiles and `SAVEGAME_##` for current-save custom profiles.
+- Removed dependency assumptions around Additional Currencies.
+
+#### Retained
+
+- Existing XML mappings remain supported.
+- Manual XML configuration remains possible.
+- Console commands remain available for troubleshooting and manual setup.
+- Runtime refresh support remains in place so active game settings and the visible Settings UI update immediately.
+
+### 1.1.0.0
+
+- Added a Settings interface action to save the current unit setup.
+- Added `suSaveCurrent` console fallback.
+- Added automatic save-specific profile creation.
+
+### 1.0.0.0
+
+- Initial public release.
+- Added per-savegame unit profile mapping using XML configuration.
+- Added default US, UK and EU profile support.
+- Added console commands for status, reload, apply and debug functions.
+
+---
+
+## Compatibility
+
+Save Unit Profiles is a PC/Mac script mod.
+
+It is designed to work with normal FS25 savegames and regional/custom maps.
+
+The mod does not require:
 
 ```text
-Documents/My Games/FarmingSimulator2025/modSettings/FS25_SaveUnitProfiles/saveUnitProfiles.xml
+Additional Currencies
+Additional Game Settings
+Realistic Livestock
 ```
 
-Example configuration:
+Those mods may be useful references or may coexist in a mod folder, but they are not required for Save Unit Profiles to function.
 
-```xml
-<saveUnitProfiles>
-    <profiles>
-        <profile name="US">
-            <money>2</money>
-            <miles>true</miles>
-            <fahrenheit>true</fahrenheit>
-            <acre>true</acre>
-            <use24HourTime>false</use24HourTime>
-        </profile>
+---
 
-        <profile name="UK">
-            <money>3</money>
-            <miles>true</miles>
-            <fahrenheit>false</fahrenheit>
-            <acre>true</acre>
-            <use24HourTime>true</use24HourTime>
-        </profile>
+## GitHub
 
-        <profile name="EU">
-            <money>1</money>
-            <miles>false</miles>
-            <fahrenheit>false</fahrenheit>
-            <acre>false</acre>
-            <use24HourTime>true</use24HourTime>
-        </profile>
-    </profiles>
-
-    <savegames>
-        <savegame slot="1" profile="UK" />
-        <savegame slot="9" profile="US" />
-        <savegame slot="12" profile="EU" />
-    </savegames>
-</saveUnitProfiles>
+```text
+https://github.com/SimGamerJen/FS25_SaveUnitProfiles
 ```
 
-## Console commands
+---
 
-- `suStatus` — shows current slot, profile, and active game settings.
-- `suReload` — reloads the XML configuration file.
-- `suApply` — applies the mapped profile for the current savegame.
-- `suApply UK` — manually applies the `UK` profile.
-- `suApply US` — manually applies the `US` profile.
-- `suApply EU` — manually applies the `EU` profile.
-- `suSaveCurrent` — saves the current game unit settings as a save-specific profile for the loaded savegame.
-- `suDebug on` — enables extra logging.
-- `suDebug off` — disables extra logging.
+## Author
 
-## Notes
+**SimGamerJen**
 
-- The **SAVE UNITS** button is available from the Settings interface and saves the current unit/currency settings for the active savegame.
-- Existing manually configured profiles and savegame mappings remain supported.
-- This mod changes display/unit preferences only.
-- It does not convert money values.
-- It does not alter savegame economy values, prices, balances, farm finances, or gameplay difficulty.
-- Because this is a Lua script mod, it is intended for PC/Mac use.
-
-## Version
-
-- Mod version: `1.1.0.0`
-- Build tag: `20260520.6`
+Fun first, skills later.
