@@ -1,6 +1,6 @@
 --[[
     FS25_SaveUnitProfiles
-    ModVersion: 1.2.0.0
+    ModVersion: 1.2.0.2
     BuildTag: 20260527.31
 
     Purpose:
@@ -15,8 +15,8 @@
 SaveUnitProfiles = {}
 SaveUnitProfiles.MOD_NAME = g_currentModName or "FS25_SaveUnitProfiles"
 SaveUnitProfiles.MOD_DIR = g_currentModDirectory or ""
-SaveUnitProfiles.VERSION = "1.2.0.0"
-SaveUnitProfiles.BUILD_TAG = "20260527.34"
+SaveUnitProfiles.VERSION = "1.2.0.2"
+SaveUnitProfiles.BUILD_TAG = "20260603.01"
 SaveUnitProfiles.config = nil
 SaveUnitProfiles.activeSlot = nil
 SaveUnitProfiles.activeProfileName = nil
@@ -116,6 +116,18 @@ function SaveUnitProfiles:debugLog(message)
     if self.debug then
         self:log(message)
     end
+end
+
+function SaveUnitProfiles:getText(key, fallback)
+    if g_i18n ~= nil and g_i18n.getText ~= nil then
+        local ok, text = pcall(function()
+            return g_i18n:getText(key)
+        end)
+        if ok and text ~= nil and tostring(text) ~= "" and tostring(text) ~= tostring(key) then
+            return tostring(text)
+        end
+    end
+    return tostring(fallback or key or "")
 end
 
 function SaveUnitProfiles:getConfigDir()
@@ -541,6 +553,10 @@ function SaveUnitProfiles:patchCurrencyFormatting()
 end
 
 function SaveUnitProfiles:getGameSetting(settingName)
+    if settingName == "use24HourTime" then
+        return self:getUse24HourTimeSetting()
+    end
+
     if g_gameSettings == nil then
         return nil
     end
@@ -588,7 +604,74 @@ function SaveUnitProfiles:settingsValueMatches(actual, expected)
     return tostring(actual) == tostring(expected)
 end
 
+function SaveUnitProfiles:hasTimeFormatSupport()
+    return TimeFormat ~= nil
+        and g_gameSettings ~= nil
+        and g_gameSettings.use24HourTime ~= nil
+end
+
+function SaveUnitProfiles:getUse24HourTimeSetting()
+    if self:hasTimeFormatSupport() then
+        return g_gameSettings.use24HourTime
+    end
+
+    return nil
+end
+
+function SaveUnitProfiles:applyUse24HourTimeSetting(value)
+    if value == nil then
+        return true, "skipped:nil"
+    end
+
+    if not self:hasTimeFormatSupport() then
+        self:debugLog("Skipping optional use24HourTime setting; FS25_TimeFormat support is not available")
+        return true, "skipped:optional-unavailable"
+    end
+
+    local boolValue = value == true
+    local details = {}
+
+    local okSettings, errSettings = pcall(function()
+        g_gameSettings.use24HourTime = boolValue
+    end)
+    details[#details + 1] = "direct(use24HourTime)=" .. tostring(okSettings and "ok" or ("error:" .. tostring(errSettings)))
+
+    local okTimeFormat, errTimeFormat = pcall(function()
+        TimeFormat.use24Hour = boolValue
+    end)
+    details[#details + 1] = "TimeFormat.use24Hour=" .. tostring(okTimeFormat and "ok" or ("error:" .. tostring(errTimeFormat)))
+
+    if TimeFormat.checkTimeFormat ~= nil and TimeFormat.checkTimeFormat.setIsChecked ~= nil then
+        local okCheck, errCheck = pcall(function()
+            TimeFormat.checkTimeFormat:setIsChecked(boolValue, true)
+        end)
+        details[#details + 1] = "TimeFormat.checkTimeFormat=" .. tostring(okCheck and "ok" or ("error:" .. tostring(errCheck)))
+    end
+
+    if TimeFormat.saveSettings ~= nil then
+        local okSave, errSave = pcall(function()
+            TimeFormat:saveSettings()
+        end)
+        details[#details + 1] = "TimeFormat.saveSettings=" .. tostring(okSave and "ok" or ("error:" .. tostring(errSave)))
+    elseif g_gameSettings.save ~= nil then
+        local okSave, errSave = pcall(function()
+            g_gameSettings:save()
+        end)
+        details[#details + 1] = "g_gameSettings.save=" .. tostring(okSave and "ok" or ("error:" .. tostring(errSave)))
+    end
+
+    local current = self:getUse24HourTimeSetting()
+    local verified = self:settingsValueMatches(current, boolValue)
+    details[#details + 1] = "verified=" .. tostring(verified)
+
+    return verified or okSettings, table.concat(details, ",")
+end
+
 function SaveUnitProfiles:setGameSetting(settingName, value)
+    if settingName == "use24HourTime" then
+        return self:applyUse24HourTimeSetting(value)
+    end
+
     if value == nil then
         return true, "skipped:nil"
     end
@@ -1029,18 +1112,22 @@ end
 
 function SaveUnitProfiles:getProfilePreviewText(profile, profileNameOverride)
     if profile == nil then
-        return "No profile selected."
+        return self:getText("saveUnitProfiles_noProfileSelected", "No profile selected.")
     end
 
     local friendlyProfileName = self:getProfileFriendlyNameByName(profileNameOverride or profile.name)
+    local speedDistance = profile.miles and self:getText("saveUnitProfiles_milesMph", "miles / mph") or self:getText("saveUnitProfiles_kilometresKmh", "kilometres / km/h")
+    local temperature = profile.fahrenheit and self:getText("saveUnitProfiles_fahrenheit", "Fahrenheit") or self:getText("saveUnitProfiles_celsius", "Celsius")
+    local fieldArea = profile.acre and self:getText("saveUnitProfiles_acres", "acres") or self:getText("saveUnitProfiles_hectares", "hectares")
+    local timeFormat = profile.use24HourTime and self:getText("saveUnitProfiles_24Hour", "24-hour") or self:getText("saveUnitProfiles_12Hour", "12-hour")
 
     local lines = {
-        string.format("Profile: %s", friendlyProfileName),
-        string.format("Currency: %s", self:getCurrencyLabel(profile.money)),
-        string.format("Speed / distance: %s", profile.miles and "miles / mph" or "kilometres / km/h"),
-        string.format("Temperature: %s", profile.fahrenheit and "Fahrenheit" or "Celsius"),
-        string.format("Field area: %s", profile.acre and "acres" or "hectares"),
-        string.format("Time format: %s", profile.use24HourTime and "24-hour" or "12-hour")
+        string.format(self:getText("saveUnitProfiles_previewProfile", "Profile: %s"), friendlyProfileName),
+        string.format(self:getText("saveUnitProfiles_previewCurrency", "Currency: %s"), self:getCurrencyLabel(profile.money)),
+        string.format(self:getText("saveUnitProfiles_previewSpeedDistance", "Speed / distance: %s"), speedDistance),
+        string.format(self:getText("saveUnitProfiles_previewTemperature", "Temperature: %s"), temperature),
+        string.format(self:getText("saveUnitProfiles_previewFieldArea", "Field area: %s"), fieldArea),
+        string.format(self:getText("saveUnitProfiles_previewTimeFormat", "Time format: %s"), timeFormat)
     }
 
     return table.concat(lines, "\n")
@@ -1400,7 +1487,7 @@ end
 function SaveUnitProfiles:openUnitProfileDialog()
     self:injectSettingsRows()
     self:refreshSettingsRows()
-    self:showNotification("Use the Unit Profile row in Settings to choose and apply a profile", false)
+    self:showNotification(self:getText("saveUnitProfiles_useSettingsRow", "Use the Unit Profile row in Settings to choose and apply a profile"), false)
 end
 
 function SaveUnitProfiles:onUnitProfileDialogClosed(profileNames, options, ...)
@@ -1750,7 +1837,7 @@ function SaveUnitProfiles:injectSettingsRows()
     end
 
     profileRow.id = "sup_unitProfileRow"
-    self:setSettingsRowLabel(profileRow, "Unit Profile")
+    self:setSettingsRowLabel(profileRow, self:getText("saveUnitProfiles_unitProfile", "Unit Profile"))
 
     local profileSelector = self:findChildByType(profileRow, "MultiTextOption")
     if profileSelector == nil then
@@ -1785,17 +1872,17 @@ function SaveUnitProfiles:injectSettingsRows()
         local customRow = buttonTemplate:clone(settingsPage)
         if customRow ~= nil then
             customRow.id = "sup_saveCustomProfileRow"
-            self:setSettingsRowLabel(customRow, "Save Current Units")
+            self:setSettingsRowLabel(customRow, self:getText("saveUnitProfiles_saveCurrentUnits", "Save Current Units"))
             local button = self:findChildByType(customRow, "Button")
             if button ~= nil then
                 button.id = "sup_saveCustomProfileButton"
-                if button.setText ~= nil then button:setText("SAVE CUSTOM") end
+                if button.setText ~= nil then button:setText(self:getText("saveUnitProfiles_saveCustom", "SAVE CUSTOM")) end
                 if button.applyProfile ~= nil then button:applyProfile("settingsButton") end
                 button.onClickCallback = function()
                     SaveUnitProfiles:openCustomProfileNameDialog()
                 end
                 if button.elements ~= nil and button.elements[1] ~= nil and button.elements[1].setText ~= nil then
-                    button.elements[1]:setText("Save the current currency and unit settings as a custom profile for this savegame.")
+                    button.elements[1]:setText(self:getText("saveUnitProfiles_saveCustomHelp", "Save the current currency and unit settings as a custom profile for this savegame."))
                 end
                 self.settingsCustomButton = button
             end
@@ -2247,7 +2334,10 @@ function SaveUnitProfiles:applyProfile(profile, profileName, reason)
     verifiedAfterRuntime = verifiedAfterRuntime and self:settingsValueMatches(self:getGameSetting("useMiles"), profile.miles)
     verifiedAfterRuntime = verifiedAfterRuntime and self:settingsValueMatches(self:getGameSetting("useFahrenheit"), profile.fahrenheit)
     verifiedAfterRuntime = verifiedAfterRuntime and self:settingsValueMatches(self:getGameSetting("useAcre"), profile.acre)
-    verifiedAfterRuntime = verifiedAfterRuntime and self:settingsValueMatches(self:getGameSetting("use24HourTime"), profile.use24HourTime)
+    local currentUse24HourTime = self:getGameSetting("use24HourTime")
+    if currentUse24HourTime ~= nil then
+        verifiedAfterRuntime = verifiedAfterRuntime and self:settingsValueMatches(currentUse24HourTime, profile.use24HourTime)
+    end
 
     if verifiedAfterRuntime then
         allOk = true

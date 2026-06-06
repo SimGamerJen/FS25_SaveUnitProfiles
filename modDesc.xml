@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no" ?>
 <modDesc descVersion="109">
     <author>SimGamerJen</author>
-    <version>1.2.0.1</version>
+    <version>1.2.0.2</version>
     <title>
         <en>Save Unit Profiles</en>
         <de>Speichereinheiten-Profile</de>
@@ -51,6 +51,11 @@ suSaveCurrent - Save the current unit settings for the loaded savegame.
 suDebug on / suDebug off - Enable or disable debug logging.
 
 Changelog:
+Version 1.2.0.2
+- Added optional compatibility handling for external time-format settings.
+- Prevented unsupported use24HourTime GameSetting calls when the optional provider is not available.
+- Added localisation keys for the Unit Profile settings row and related UI text.
+
 Version 1.2.0.1
 - Improved live settings application when changing Unit Profile from General Settings > Units.
 - Profile changes now apply correctly after leaving the Settings UI.
@@ -124,6 +129,11 @@ suSaveCurrent - Speichert die aktuellen Einheiteneinstellungen für den geladene
 suDebug on / suDebug off - Aktiviert oder deaktiviert die Debug-Protokollierung.
 
 Änderungsprotokoll:
+Version 1.2.0.2
+- Optionale Kompatibilitätsbehandlung für externe Zeitformat-Einstellungen hinzugefügt.
+- Nicht unterstützte use24HourTime-GameSetting-Aufrufe werden verhindert, wenn der optionale Anbieter nicht verfügbar ist.
+- Lokalisierungsschlüssel für die Einheitenprofil-Einstellungszeile und zugehörige UI-Texte hinzugefügt.
+
 Version 1.2.0.1
 - Verbesserte Live-Anwendung der Einstellungen beim Ändern des Einheitenprofils unter Allgemeine Einstellungen > Einheiten.
 - Profiländerungen werden nun korrekt angewendet, nachdem die Einstellungsoberfläche verlassen wurde.
@@ -197,6 +207,11 @@ suSaveCurrent - Enregistre les paramètres d'unités actuels pour la sauvegarde 
 suDebug on / suDebug off - Active ou désactive la journalisation de débogage.
 
 Journal des modifications :
+Version 1.2.0.2
+- Ajout d'une gestion de compatibilité optionnelle pour les paramètres externes de format de l'heure.
+- Prévention des appels GameSetting use24HourTime non pris en charge lorsque le fournisseur optionnel n'est pas disponible.
+- Ajout de clés de localisation pour la ligne de paramètres Profil d'unités et les textes d'interface associés.
+
 Version 1.2.0.1
 - Amélioration de l'application en direct des paramètres lors du changement de profil d'unités dans Paramètres généraux > Unités.
 - Les changements de profil sont désormais correctement appliqués après la fermeture de l'interface des paramètres.
@@ -230,6 +245,110 @@ https://github.com/SimGamerJen/FS25_SaveUnitProfiles
     </description>
     <iconFilename>icon_SaveUnitProfiles.dds</iconFilename>
     <multiplayer supported="true" />
+
+
+    <l10n>
+        <text name="saveUnitProfiles_unitProfile">
+            <en>Unit Profile</en>
+            <de>Einheitenprofil</de>
+            <fr>Profil d'unités</fr>
+        </text>
+        <text name="saveUnitProfiles_saveCurrentUnits">
+            <en>Save Current Units</en>
+            <de>Aktuelle Einheiten speichern</de>
+            <fr>Enregistrer les unités actuelles</fr>
+        </text>
+        <text name="saveUnitProfiles_saveCustom">
+            <en>SAVE CUSTOM</en>
+            <de>BENUTZERDEFINIERT SPEICHERN</de>
+            <fr>ENREGISTRER PERSONNALISÉ</fr>
+        </text>
+        <text name="saveUnitProfiles_saveCustomHelp">
+            <en>Save the current currency and unit settings as a custom profile for this savegame.</en>
+            <de>Speichert die aktuellen Währungs- und Einheiteneinstellungen als benutzerdefiniertes Profil für diesen Spielstand.</de>
+            <fr>Enregistre les paramètres actuels de devise et d'unités comme profil personnalisé pour cette sauvegarde.</fr>
+        </text>
+        <text name="saveUnitProfiles_useSettingsRow">
+            <en>Use the Unit Profile row in Settings to choose and apply a profile.</en>
+            <de>Verwende die Zeile „Einheitenprofil“ in den Einstellungen, um ein Profil auszuwählen und anzuwenden.</de>
+            <fr>Utilisez la ligne Profil d'unités dans les paramètres pour choisir et appliquer un profil.</fr>
+        </text>
+        <text name="saveUnitProfiles_noProfileSelected">
+            <en>No profile selected.</en>
+            <de>Kein Profil ausgewählt.</de>
+            <fr>Aucun profil sélectionné.</fr>
+        </text>
+        <text name="saveUnitProfiles_previewProfile">
+            <en>Profile: %s</en>
+            <de>Profil: %s</de>
+            <fr>Profil : %s</fr>
+        </text>
+        <text name="saveUnitProfiles_previewCurrency">
+            <en>Currency: %s</en>
+            <de>Währung: %s</de>
+            <fr>Devise : %s</fr>
+        </text>
+        <text name="saveUnitProfiles_previewSpeedDistance">
+            <en>Speed / distance: %s</en>
+            <de>Geschwindigkeit / Entfernung: %s</de>
+            <fr>Vitesse / distance : %s</fr>
+        </text>
+        <text name="saveUnitProfiles_previewTemperature">
+            <en>Temperature: %s</en>
+            <de>Temperatur: %s</de>
+            <fr>Température : %s</fr>
+        </text>
+        <text name="saveUnitProfiles_previewFieldArea">
+            <en>Field area: %s</en>
+            <de>Feldfläche: %s</de>
+            <fr>Surface des champs : %s</fr>
+        </text>
+        <text name="saveUnitProfiles_previewTimeFormat">
+            <en>Time format: %s</en>
+            <de>Zeitformat: %s</de>
+            <fr>Format de l'heure : %s</fr>
+        </text>
+        <text name="saveUnitProfiles_milesMph">
+            <en>miles / mph</en>
+            <de>Meilen / mph</de>
+            <fr>miles / mph</fr>
+        </text>
+        <text name="saveUnitProfiles_kilometresKmh">
+            <en>kilometres / km/h</en>
+            <de>Kilometer / km/h</de>
+            <fr>kilomètres / km/h</fr>
+        </text>
+        <text name="saveUnitProfiles_fahrenheit">
+            <en>Fahrenheit</en>
+            <de>Fahrenheit</de>
+            <fr>Fahrenheit</fr>
+        </text>
+        <text name="saveUnitProfiles_celsius">
+            <en>Celsius</en>
+            <de>Celsius</de>
+            <fr>Celsius</fr>
+        </text>
+        <text name="saveUnitProfiles_acres">
+            <en>acres</en>
+            <de>Acres</de>
+            <fr>acres</fr>
+        </text>
+        <text name="saveUnitProfiles_hectares">
+            <en>hectares</en>
+            <de>Hektar</de>
+            <fr>hectares</fr>
+        </text>
+        <text name="saveUnitProfiles_24Hour">
+            <en>24-hour</en>
+            <de>24-Stunden</de>
+            <fr>24 heures</fr>
+        </text>
+        <text name="saveUnitProfiles_12Hour">
+            <en>12-hour</en>
+            <de>12-Stunden</de>
+            <fr>12 heures</fr>
+        </text>
+    </l10n>
 
     <extraSourceFiles>
         <sourceFile filename="scripts/SU_Core.lua" />
